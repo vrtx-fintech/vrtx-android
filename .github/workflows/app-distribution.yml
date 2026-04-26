@@ -97,7 +97,7 @@ jobs:
           SANDBOX_APP_ID: ${{ secrets.SANDBOX_FIREBASE_APP_ID }}
           STAGING_APP_ID: ${{ secrets.STAGING_FIREBASE_APP_ID }}
           ENVIRONMENT: ${{ inputs.environment || 'sandbox' }}
-          RELEASE_NOTES: ${{ inputs.release_notes || format('PR #{0} build {1}', github.event.pull_request.number, github.sha) }}
+          RELEASE_NOTES: ${{ inputs.release_notes || format('PR {0} build {1}', github.event.pull_request.number, github.sha) }}
           TESTERS: ${{ secrets.FIREBASE_TESTERS }}
         run: |
           if [[ "${ENVIRONMENT}" == "sandbox" ]]; then
