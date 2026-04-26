@@ -2,6 +2,12 @@ name: CI
 
 on:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'SDK version to publish'
+        required: true
+        default: '0.1.0'
 
 jobs:
   build:
@@ -23,4 +29,5 @@ jobs:
           # these in repo Settings → Secrets and variables → Actions.
           GITHUB_USER: ${{ secrets.GH_PACKAGES_USER }}
           GITHUB_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
-        run: ./gradlew publishToMavenLocal
+          SDK_VERSION: ${{ inputs.version || '0.1.0' }}
+        run: ./gradlew publishToMavenLocal -PsdkVersion=$SDK_VERSION
