@@ -97,6 +97,7 @@ jobs:
           STAGING_APP_ID: ${{ secrets.STAGING_FIREBASE_APP_ID }}
           ENVIRONMENT: ${{ inputs.environment }}
           RELEASE_NOTES: ${{ inputs.release_notes }}
+          TESTERS: ${{ secrets.FIREBASE_TESTERS }}
         run: |
           if [[ "${ENVIRONMENT}" == "sandbox" ]]; then
             APP_ID="${SANDBOX_APP_ID}"
@@ -105,10 +106,12 @@ jobs:
           fi
           NOTES_FILE=$(mktemp)
           printf '%s' "${RELEASE_NOTES}" > "${NOTES_FILE}"
+          TESTERS_FILE=$(mktemp)
+          printf '%s' "${TESTERS}" > "${TESTERS_FILE}"
           firebase appdistribution:distribute example/app/build/outputs/apk/release/app-release.apk \
             --app "${APP_ID}" \
             --release-notes-file "${NOTES_FILE}" \
-            --testers-file example/testers.txt
+            --testers-file "${TESTERS_FILE}"
 
       - name: Clean up credentials
         if: ${{ success() || failure() }}
