@@ -1,6 +1,7 @@
 name: App Distribution
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       wrapper_version:
@@ -72,8 +73,8 @@ jobs:
         env:
           VRTX_CLIENT_ID: ${{ secrets.VRTX_CLIENT_ID }}
           VRTX_CLIENT_SECRET: ${{ secrets.VRTX_CLIENT_SECRET }}
-          VRTX_ENVIRONMENT: ${{ inputs.environment }}
-          WRAPPER_VERSION: ${{ inputs.wrapper_version }}
+          VRTX_ENVIRONMENT: ${{ inputs.environment || 'sandbox' }}
+          WRAPPER_VERSION: ${{ inputs.wrapper_version || '0.1.0' }}
         run: ./gradlew -p example :app:assembleRelease -PwrapperVersion=$WRAPPER_VERSION --no-daemon --build-cache
 
       - name: Install Firebase CLI
@@ -95,8 +96,8 @@ jobs:
         env:
           SANDBOX_APP_ID: ${{ secrets.SANDBOX_FIREBASE_APP_ID }}
           STAGING_APP_ID: ${{ secrets.STAGING_FIREBASE_APP_ID }}
-          ENVIRONMENT: ${{ inputs.environment }}
-          RELEASE_NOTES: ${{ inputs.release_notes }}
+          ENVIRONMENT: ${{ inputs.environment || 'sandbox' }}
+          RELEASE_NOTES: ${{ inputs.release_notes || format('PR #{0} build {1}', github.event.pull_request.number, github.sha) }}
           TESTERS: ${{ secrets.FIREBASE_TESTERS }}
         run: |
           if [[ "${ENVIRONMENT}" == "sandbox" ]]; then
