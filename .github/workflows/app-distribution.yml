@@ -7,7 +7,7 @@ on:
         type: string
         required: true
         default: '0.1.0'
-        description: JitPack tag of com.github.vrtx-fintech:vrtx-android to consume
+        description: Wrapper version to build and publish to mavenLocal for the example
       environment:
         type: choice
         required: true
@@ -67,7 +67,15 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@39e147cb9de83bb9910b8ef8bd7fff0ee20fcd6f # v6.0.1
 
-      - name: Build release APK against JitPack-published wrapper
+      - name: Publish wrapper to mavenLocal
+        shell: bash
+        env:
+          GITHUB_USER: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          SDK_VERSION: ${{ inputs.wrapper_version }}
+        run: ./gradlew publishToMavenLocal -PsdkVersion=$SDK_VERSION --no-daemon
+
+      - name: Build release APK against published wrapper
         shell: bash
         env:
           VRTX_CLIENT_ID: ${{ secrets.VRTX_CLIENT_ID }}
