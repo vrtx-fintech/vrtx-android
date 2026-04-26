@@ -24,10 +24,7 @@ jobs:
 
       - name: Build and publish to mavenLocal
         env:
-          # PAT with read:packages scope for the private sa.vrtx:sdk artifact
-          # hosted on vrtx-fintech/vrtx-sdk-android GitHub Packages. Configure
-          # these in repo Settings → Secrets and variables → Actions.
-          GITHUB_USER: ${{ secrets.GH_PACKAGES_USER }}
-          GITHUB_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          GITHUB_USER: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SDK_VERSION: ${{ inputs.version || '0.1.0' }}
         run: ./gradlew publishToMavenLocal -PsdkVersion=$SDK_VERSION
