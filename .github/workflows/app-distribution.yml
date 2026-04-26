@@ -74,7 +74,7 @@ jobs:
           VRTX_CLIENT_ID: ${{ secrets.VRTX_CLIENT_ID }}
           VRTX_CLIENT_SECRET: ${{ secrets.VRTX_CLIENT_SECRET }}
           VRTX_ENVIRONMENT: ${{ inputs.environment || 'sandbox' }}
-          WRAPPER_VERSION: ${{ inputs.wrapper_version || '0.1.0' }}
+          WRAPPER_VERSION: ${{ inputs.wrapper_version || github.event.pull_request.head.sha }}
         run: ./gradlew -p example :app:assembleRelease -PwrapperVersion=$WRAPPER_VERSION --no-daemon --build-cache
 
       - name: Install Firebase CLI
