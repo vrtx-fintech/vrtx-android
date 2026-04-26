@@ -22,9 +22,16 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Build and publish to mavenLocal
+      - name: Publish wrapper to mavenLocal
         env:
           GITHUB_USER: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
           SDK_VERSION: ${{ inputs.version || '0.1.0' }}
         run: ./gradlew publishToMavenLocal -PsdkVersion=$SDK_VERSION
+
+      - name: Build example app against published wrapper
+        env:
+          VRTX_CLIENT_ID: ${{ secrets.VRTX_CLIENT_ID }}
+          VRTX_CLIENT_SECRET: ${{ secrets.VRTX_CLIENT_SECRET }}
+          VRTX_ENVIRONMENT: staging
+        run: ./gradlew -p example :app:assembleDebug

@@ -6,7 +6,7 @@ plugins {
     `maven-publish`
 }
 
-group = "sa.vrtx.android"
+group = "com.github.vrtx-fintech"
 version = (project.findProperty("sdkVersion") as String?) ?: "0.1.0"
 
 androidFusedLibrary {
