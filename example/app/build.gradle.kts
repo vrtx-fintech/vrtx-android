@@ -14,6 +14,9 @@ val localProperties = Properties().apply {
 fun localProperty(key: String, default: String = ""): String =
     (localProperties.getProperty(key) ?: System.getenv(key) ?: default)
 
+val wrapperVersion: String =
+    (project.findProperty("wrapperVersion") as String?) ?: "0.1.0"
+
 android {
     namespace = "sa.vrtx.example"
     compileSdk = 36
@@ -35,6 +38,15 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            // Sign with the debug keystore for App Distribution test builds.
+            // Replace with a real release signingConfig before shipping.
+            signingConfig = signingConfigs.getByName("debug")
+        }
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -49,7 +61,8 @@ kotlin {
 
 dependencies {
     // Pulls the fused wrapper from JitPack (or mavenLocal during dev).
-    implementation("com.github.vrtx-fintech:vrtx-android:0.1.0")
+    // Override at build time with -PwrapperVersion=<tag>.
+    implementation("com.github.vrtx-fintech:vrtx-android:$wrapperVersion")
 
     implementation(platform("androidx.compose:compose-bom:2025.12.01"))
     implementation("androidx.compose.foundation:foundation")
