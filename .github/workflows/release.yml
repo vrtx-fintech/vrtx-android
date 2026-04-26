@@ -1,6 +1,7 @@
 name: Release
 
 on:
+  pull_request:
   push:
     tags:
       - '*.*.*'
@@ -16,7 +17,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: release-${{ inputs.version || github.ref_name }}
+  group: release-0.1.1
   cancel-in-progress: false
 
 jobs:
@@ -55,14 +56,14 @@ jobs:
         env:
           GITHUB_USER: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
-          SDK_VERSION: ${{ inputs.version || github.ref_name }}
+          SDK_VERSION: '0.1.1'
         run: ./gradlew publishToMavenLocal -PsdkVersion=$SDK_VERSION --no-daemon
 
       - name: Create GitHub Release with AAR
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          SDK_VERSION: ${{ inputs.version || github.ref_name }}
+          SDK_VERSION: '0.1.1'
         run: |
           ARTIFACT_DIR="${HOME}/.m2/repository/com/github/vrtx-fintech/vrtx-android/${SDK_VERSION}"
           gh release create "${SDK_VERSION}" \
