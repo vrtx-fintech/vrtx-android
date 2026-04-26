@@ -25,6 +25,6 @@ jobs:
       - name: Build and publish to mavenLocal
         env:
           GITHUB_USER: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
           SDK_VERSION: ${{ inputs.version || '0.1.0' }}
         run: ./gradlew publishToMavenLocal -PsdkVersion=$SDK_VERSION
