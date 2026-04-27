@@ -33,13 +33,20 @@ tasks.matching { it.name == "validateDependencies" }.configureEach {
 }
 
 // Maven Central requires sources and javadoc jars; fused-library doesn't
-// emit them, so attach empty placeholders.
+// emit them, so attach empty placeholders. We can't rely on the `base`
+// plugin's archive-name conventions (it pulls in LifecycleBasePlugin,
+// which collides with fused-library's pre-created `assemble` task), so
+// set archiveBaseName/destinationDirectory explicitly.
 val sourcesJar by tasks.registering(Jar::class) {
+    archiveBaseName.set(rootProject.name)
     archiveClassifier.set("sources")
+    destinationDirectory.set(layout.buildDirectory.dir("libs"))
 }
 
 val javadocJar by tasks.registering(Jar::class) {
+    archiveBaseName.set(rootProject.name)
     archiveClassifier.set("javadoc")
+    destinationDirectory.set(layout.buildDirectory.dir("libs"))
 }
 
 // Signing and Central Portal upload are handled in the release workflow
