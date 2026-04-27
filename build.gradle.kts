@@ -3,10 +3,10 @@ plugins {
     id("com.android.fused-library") version "8.13.2"
     id("org.jetbrains.kotlin.android") version "2.3.0" apply false
     id("org.jetbrains.kotlin.plugin.compose") version "2.3.0" apply false
-    `maven-publish`
+    id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
-group = "com.github.vrtx-fintech"
+group = "io.github.abdel-monaam-aouini"
 version = (project.findProperty("sdkVersion") as String?) ?: "0.1.0"
 
 androidFusedLibrary {
@@ -32,24 +32,50 @@ tasks.matching { it.name == "validateDependencies" }.configureEach {
     }
 }
 
-afterEvaluate {
-    publishing {
-        publications.named<MavenPublication>("maven") {
-            groupId = project.group.toString()
-            artifactId = rootProject.name
-            version = project.version.toString()
-        }
-        repositories {
-            maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/vrtx-fintech/vrtx-android")
-                credentials {
-                    username = (project.findProperty("gpr.user") as String?)
-                        ?: System.getenv("GITHUB_USER")
-                    password = (project.findProperty("gpr.token") as String?)
-                        ?: System.getenv("GITHUB_TOKEN")
-                }
+// Maven Central requires sources and javadoc jars; fused-library doesn't
+// emit them, so attach empty placeholders.
+val sourcesJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("sources")
+}
+
+val javadocJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("javadoc")
+}
+
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
+
+    coordinates(group.toString(), rootProject.name, version.toString())
+
+    pom {
+        name.set("vrtx-android")
+        description.set("Android SDK wrapper for vrtx Pay — drop one AAR for the full vrtx onboarding, wallet, and card flows.")
+        url.set("https://github.com/vrtx-fintech/vrtx-android")
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
             }
         }
+        developers {
+            developer {
+                id.set("abdel-monaam-aouini")
+                name.set("AbdelMonaam Aouini")
+                email.set("abdelmonaam@vrtx.sa")
+            }
+        }
+        scm {
+            url.set("https://github.com/vrtx-fintech/vrtx-android")
+            connection.set("scm:git:git://github.com/vrtx-fintech/vrtx-android.git")
+            developerConnection.set("scm:git:ssh://git@github.com/vrtx-fintech/vrtx-android.git")
+        }
+    }
+}
+
+afterEvaluate {
+    publishing.publications.named<MavenPublication>("maven") {
+        artifact(sourcesJar)
+        artifact(javadocJar)
     }
 }

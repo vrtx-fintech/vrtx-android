@@ -1,8 +1,6 @@
 # vrtx-android
 
-Android SDK wrapper for **vrtx Pay**. Drop one AAR into your app and your users get the full vrtx onboarding, wallet and card flows — no extra credentials, no extra repositories to wire up for the SDK source.
-
-The wrapper is a single fused AAR: the entire vrtx SDK is bundled inside, so consumers never authenticate against the private source registry.
+The official Android SDK for **vrtx Pay** — onboarding, wallet, and card flows for your app.
 
 ## Requirements
 
@@ -17,7 +15,7 @@ The wrapper is a single fused AAR: the entire vrtx SDK is bundled inside, so con
 
 ## Install
 
-Tagged releases attach `vrtx-android-<version>.aar`, `.pom`, and `.module` to their [GitHub Release](https://github.com/vrtx-fintech/vrtx-android/releases). Point Gradle at that download URL with an Ivy repository that reads the Gradle module metadata — every transitive dep (Compose, Retrofit, biometric, etc.) resolves automatically from public Maven.
+Add `mavenCentral()` and JitPack to your repositories, then declare the dependency.
 
 ```kotlin
 // settings.gradle.kts
@@ -26,17 +24,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // The wrapper's `emvnfccard` transitive is JitPack-only:
         maven { url = uri("https://jitpack.io") }
-        // The wrapper itself ships from GitHub Releases:
-        ivy {
-            url = uri("https://github.com/vrtx-fintech/vrtx-android/releases/download")
-            patternLayout {
-                artifact("[revision]/vrtx-android-[revision].[ext]")
-            }
-            metadataSources { gradleMetadata() }
-            content { includeModule("com.github.vrtx-fintech", "vrtx-android") }
-        }
     }
 }
 ```
@@ -44,7 +32,7 @@ dependencyResolutionManagement {
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("com.github.vrtx-fintech:vrtx-android:0.1.0")
+    implementation("io.github.abdel-monaam-aouini:vrtx-android:0.1.0")
 }
 ```
 
@@ -121,7 +109,6 @@ A working consumer app lives under [`example/`](example/), branded as a fictiona
 
 The example reads credentials from `local.properties` via `BuildConfig` — see [example/app/build.gradle.kts](example/app/build.gradle.kts) for the pattern you can reuse.
 
-
 ## License
 
-Internal — vrtx fintech.
+Licensed under the [Apache License, Version 2.0](LICENSE). Copyright © 2026 vrtx fintech.
