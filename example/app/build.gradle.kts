@@ -60,9 +60,9 @@ kotlin {
 }
 
 dependencies {
-    // Pulls the fused wrapper from JitPack (or mavenLocal during dev).
+    // Pulls the fused wrapper from Maven Central (or mavenLocal during dev).
     // Override at build time with -PwrapperVersion=<tag>.
-    implementation("com.github.vrtx-fintech:vrtx-android:$wrapperVersion")
+    implementation("io.github.abdel-monaam-aouini:vrtx-android:$wrapperVersion")
 
     implementation(platform("androidx.compose:compose-bom:2025.12.01"))
     implementation("androidx.compose.foundation:foundation")
