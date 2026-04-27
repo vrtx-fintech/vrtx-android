@@ -4,8 +4,6 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.3.0" apply false
     id("org.jetbrains.kotlin.plugin.compose") version "2.3.0" apply false
     `maven-publish`
-    signing
-    id("com.gradleup.nmcp") version "0.0.9"
 }
 
 group = "io.github.abdel-monaam-aouini"
@@ -44,59 +42,39 @@ val javadocJar by tasks.registering(Jar::class) {
     archiveClassifier.set("javadoc")
 }
 
+// Signing and Central Portal upload are handled in the release workflow
+// via shell + gpg + curl, because applying the `signing` Gradle plugin
+// (or anything that pulls in LifecycleBasePlugin) collides with the
+// `assemble` task `com.android.fused-library` pre-creates.
 afterEvaluate {
-    publishing {
-        publications.named<MavenPublication>("maven") {
-            groupId = project.group.toString()
-            artifactId = rootProject.name
-            version = project.version.toString()
-            artifact(sourcesJar)
-            artifact(javadocJar)
-            pom {
-                name.set("vrtx-android")
-                description.set("Android SDK for vrtx Pay — onboarding, wallet, and card flows.")
+    publishing.publications.named<MavenPublication>("maven") {
+        groupId = project.group.toString()
+        artifactId = rootProject.name
+        version = project.version.toString()
+        artifact(sourcesJar)
+        artifact(javadocJar)
+        pom {
+            name.set("vrtx-android")
+            description.set("Android SDK for vrtx Pay — onboarding, wallet, and card flows.")
+            url.set("https://github.com/vrtx-fintech/vrtx-android")
+            licenses {
+                license {
+                    name.set("The Apache License, Version 2.0")
+                    url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                }
+            }
+            developers {
+                developer {
+                    id.set("abdel-monaam-aouini")
+                    name.set("AbdelMonaam Aouini")
+                    email.set("abdelmonaam@vrtx.sa")
+                }
+            }
+            scm {
                 url.set("https://github.com/vrtx-fintech/vrtx-android")
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("abdel-monaam-aouini")
-                        name.set("AbdelMonaam Aouini")
-                        email.set("abdelmonaam@vrtx.sa")
-                    }
-                }
-                scm {
-                    url.set("https://github.com/vrtx-fintech/vrtx-android")
-                    connection.set("scm:git:git://github.com/vrtx-fintech/vrtx-android.git")
-                    developerConnection.set("scm:git:ssh://git@github.com/vrtx-fintech/vrtx-android.git")
-                }
+                connection.set("scm:git:git://github.com/vrtx-fintech/vrtx-android.git")
+                developerConnection.set("scm:git:ssh://git@github.com/vrtx-fintech/vrtx-android.git")
             }
         }
-    }
-
-    signing {
-        val signingKey = providers.gradleProperty("signingInMemoryKey").orNull
-        val signingKeyId = providers.gradleProperty("signingInMemoryKeyId").orNull
-        val signingPassword = providers.gradleProperty("signingInMemoryKeyPassword").orNull
-        if (!signingKey.isNullOrBlank() && !signingPassword.isNullOrBlank()) {
-            if (!signingKeyId.isNullOrBlank()) {
-                useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
-            } else {
-                useInMemoryPgpKeys(signingKey, signingPassword)
-            }
-            sign(publishing.publications["maven"])
-        }
-    }
-}
-
-nmcp {
-    publishAllPublications {
-        username = providers.gradleProperty("mavenCentralUsername")
-        password = providers.gradleProperty("mavenCentralPassword")
-        publicationType = "USER_MANAGED"
     }
 }

@@ -29,12 +29,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
-      ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.ORG_GRADLE_PROJECT_MAVENCENTRALUSERNAME }}
-      ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.ORG_GRADLE_PROJECT_MAVENCENTRALPASSWORD }}
-      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGINMEMORYKEY }}
-      ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGINMEMORYKEYID }}
-      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGINMEMORYKEYPASSWORD }}
       SDK_VERSION: ${{ github.event.inputs.version || format('0.0.0-pr{0}', github.event.pull_request.number) }}
+      ARTIFACT_DIR_REL: io/github/abdel-monaam-aouini/vrtx-android
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -61,8 +57,7 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@39e147cb9de83bb9910b8ef8bd7fff0ee20fcd6f # v6.0.1
 
-      - name: Dry-run publish (PR)
-        if: github.event_name == 'pull_request'
+      - name: Build artifacts
         shell: bash
         run: ./gradlew publishToMavenLocal -PsdkVersion=$SDK_VERSION --no-daemon
 
@@ -70,20 +65,62 @@ jobs:
         if: github.event_name == 'pull_request'
         shell: bash
         run: |
-          ARTIFACT_DIR="${HOME}/.m2/repository/io/github/abdel-monaam-aouini/vrtx-android/${SDK_VERSION}"
-          echo "## Artifacts produced" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          ls -lh "$ARTIFACT_DIR" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "## POM" >> $GITHUB_STEP_SUMMARY
-          echo '```xml' >> $GITHUB_STEP_SUMMARY
-          cat "$ARTIFACT_DIR/vrtx-android-${SDK_VERSION}.pom" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          ARTIFACT_DIR="${HOME}/.m2/repository/${ARTIFACT_DIR_REL}/${SDK_VERSION}"
+          {
+            echo "## Artifacts produced"
+            echo '```'
+            ls -lh "$ARTIFACT_DIR"
+            echo '```'
+            echo "## POM"
+            echo '```xml'
+            cat "$ARTIFACT_DIR/vrtx-android-${SDK_VERSION}.pom"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Publish to Maven Central
+      - name: Sign artifacts and upload to Central Portal
         if: github.event_name == 'workflow_dispatch'
         shell: bash
-        run: ./gradlew publishAllPublicationsToCentralPortal -PsdkVersion=$SDK_VERSION --no-daemon
+        env:
+          GPG_KEY: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGINMEMORYKEY }}
+          GPG_PASSPHRASE: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGINMEMORYKEYPASSWORD }}
+          CENTRAL_USERNAME: ${{ secrets.ORG_GRADLE_PROJECT_MAVENCENTRALUSERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.ORG_GRADLE_PROJECT_MAVENCENTRALPASSWORD }}
+        run: |
+          set -euo pipefail
+          ARTIFACT_DIR="${HOME}/.m2/repository/${ARTIFACT_DIR_REL}/${SDK_VERSION}"
+
+          # Import the secret key.
+          echo "$GPG_KEY" | gpg --batch --import
+
+          # Sign every release artifact and write md5/sha1 sidecars.
+          # Skip Maven's local-only metadata and any pre-existing checksums.
+          cd "$ARTIFACT_DIR"
+          for f in *; do
+            case "$f" in
+              *.asc|*.md5|*.sha1|maven-metadata*.xml) continue ;;
+            esac
+            echo "$GPG_PASSPHRASE" | gpg --batch --pinentry-mode loopback \
+              --passphrase-fd 0 --detach-sign --armor "$f"
+            md5sum "$f"  | cut -d' ' -f1 > "$f.md5"
+            sha1sum "$f" | cut -d' ' -f1 > "$f.sha1"
+          done
+
+          # Build the deployment bundle. Paths inside the zip must mirror
+          # the groupId/artifactId/version layout Central expects.
+          BUNDLE="${RUNNER_TEMP}/bundle-${SDK_VERSION}.zip"
+          (cd "${HOME}/.m2/repository" && zip -r "$BUNDLE" "${ARTIFACT_DIR_REL}/${SDK_VERSION}")
+
+          # Upload as a USER_MANAGED deployment — sits on the Central Portal
+          # as a draft until you click Publish (or drop it).
+          AUTH=$(printf '%s:%s' "$CENTRAL_USERNAME" "$CENTRAL_PASSWORD" | base64 -w0)
+          HTTP_CODE=$(curl -sS -o "${RUNNER_TEMP}/upload-response.txt" -w "%{http_code}" \
+            -X POST \
+            -H "Authorization: UserToken $AUTH" \
+            -F "bundle=@${BUNDLE}" \
+            "https://central.sonatype.com/api/v1/publisher/upload?name=vrtx-android-${SDK_VERSION}&publishingType=USER_MANAGED")
+          echo "Upload HTTP $HTTP_CODE"
+          cat "${RUNNER_TEMP}/upload-response.txt"
+          [ "$HTTP_CODE" = "201" ]
 
       - name: Create GitHub Release
         if: github.event_name == 'workflow_dispatch'
