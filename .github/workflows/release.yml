@@ -8,20 +8,13 @@ on:
         required: true
         default: '0.0.0-test'
         description: Version to build and publish to Maven Central
-  pull_request:
-    paths:
-      - 'build.gradle.kts'
-      - 'settings.gradle.kts'
-      - 'gradle.properties'
-      - 'wrapper-src/**'
-      - '.github/workflows/release.yml'
 
 permissions:
   contents: write
 
 concurrency:
-  group: release-${{ github.event.inputs.version || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: release-${{ github.event.inputs.version }}
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -29,7 +22,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
-      SDK_VERSION: ${{ github.event.inputs.version || format('0.0.0-pr{0}', github.event.pull_request.number) }}
+      SDK_VERSION: ${{ github.event.inputs.version }}
       ARTIFACT_DIR_REL: io/github/abdel-monaam-aouini/vrtx-android
     steps:
       - name: Checkout
@@ -61,24 +54,7 @@ jobs:
         shell: bash
         run: ./gradlew publishToMavenLocal -PsdkVersion=$SDK_VERSION --no-daemon
 
-      - name: Inspect generated artifacts (PR)
-        if: github.event_name == 'pull_request'
-        shell: bash
-        run: |
-          ARTIFACT_DIR="${HOME}/.m2/repository/${ARTIFACT_DIR_REL}/${SDK_VERSION}"
-          {
-            echo "## Artifacts produced"
-            echo '```'
-            ls -lh "$ARTIFACT_DIR"
-            echo '```'
-            echo "## POM"
-            echo '```xml'
-            cat "$ARTIFACT_DIR/vrtx-android-${SDK_VERSION}.pom"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-
       - name: Sign artifacts and upload to Central Portal
-        if: github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           GPG_KEY: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGINMEMORYKEY }}
@@ -123,7 +99,6 @@ jobs:
           [ "$HTTP_CODE" = "201" ]
 
       - name: Create GitHub Release
-        if: github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
