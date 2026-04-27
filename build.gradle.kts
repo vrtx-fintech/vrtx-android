@@ -3,7 +3,9 @@ plugins {
     id("com.android.fused-library") version "8.13.2"
     id("org.jetbrains.kotlin.android") version "2.3.0" apply false
     id("org.jetbrains.kotlin.plugin.compose") version "2.3.0" apply false
-    id("com.vanniktech.maven.publish") version "0.30.0"
+    `maven-publish`
+    signing
+    id("com.gradleup.nmcp") version "0.0.9"
 }
 
 group = "io.github.abdel-monaam-aouini"
@@ -42,40 +44,59 @@ val javadocJar by tasks.registering(Jar::class) {
     archiveClassifier.set("javadoc")
 }
 
-mavenPublishing {
-    publishToMavenCentral()
-    signAllPublications()
-
-    coordinates(group.toString(), rootProject.name, version.toString())
-
-    pom {
-        name.set("vrtx-android")
-        description.set("Android SDK wrapper for vrtx Pay — drop one AAR for the full vrtx onboarding, wallet, and card flows.")
-        url.set("https://github.com/vrtx-fintech/vrtx-android")
-        licenses {
-            license {
-                name.set("The Apache License, Version 2.0")
-                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+afterEvaluate {
+    publishing {
+        publications.named<MavenPublication>("maven") {
+            groupId = project.group.toString()
+            artifactId = rootProject.name
+            version = project.version.toString()
+            artifact(sourcesJar)
+            artifact(javadocJar)
+            pom {
+                name.set("vrtx-android")
+                description.set("Android SDK for vrtx Pay — onboarding, wallet, and card flows.")
+                url.set("https://github.com/vrtx-fintech/vrtx-android")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("abdel-monaam-aouini")
+                        name.set("AbdelMonaam Aouini")
+                        email.set("abdelmonaam@vrtx.sa")
+                    }
+                }
+                scm {
+                    url.set("https://github.com/vrtx-fintech/vrtx-android")
+                    connection.set("scm:git:git://github.com/vrtx-fintech/vrtx-android.git")
+                    developerConnection.set("scm:git:ssh://git@github.com/vrtx-fintech/vrtx-android.git")
+                }
             }
         }
-        developers {
-            developer {
-                id.set("abdel-monaam-aouini")
-                name.set("AbdelMonaam Aouini")
-                email.set("abdelmonaam@vrtx.sa")
+    }
+
+    signing {
+        val signingKey = providers.gradleProperty("signingInMemoryKey").orNull
+        val signingKeyId = providers.gradleProperty("signingInMemoryKeyId").orNull
+        val signingPassword = providers.gradleProperty("signingInMemoryKeyPassword").orNull
+        if (!signingKey.isNullOrBlank() && !signingPassword.isNullOrBlank()) {
+            if (!signingKeyId.isNullOrBlank()) {
+                useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+            } else {
+                useInMemoryPgpKeys(signingKey, signingPassword)
             }
-        }
-        scm {
-            url.set("https://github.com/vrtx-fintech/vrtx-android")
-            connection.set("scm:git:git://github.com/vrtx-fintech/vrtx-android.git")
-            developerConnection.set("scm:git:ssh://git@github.com/vrtx-fintech/vrtx-android.git")
+            sign(publishing.publications["maven"])
         }
     }
 }
 
-afterEvaluate {
-    publishing.publications.named<MavenPublication>("maven") {
-        artifact(sourcesJar)
-        artifact(javadocJar)
+nmcp {
+    publishAllPublications {
+        username = providers.gradleProperty("mavenCentralUsername")
+        password = providers.gradleProperty("mavenCentralPassword")
+        publicationType = "USER_MANAGED"
     }
 }

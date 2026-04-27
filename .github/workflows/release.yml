@@ -83,7 +83,7 @@ jobs:
       - name: Publish to Maven Central
         if: github.event_name == 'workflow_dispatch'
         shell: bash
-        run: ./gradlew publishToMavenCentral -PsdkVersion=$SDK_VERSION --no-daemon
+        run: ./gradlew publishAllPublicationsToCentralPortal -PsdkVersion=$SDK_VERSION --no-daemon
 
       - name: Create GitHub Release
         if: github.event_name == 'workflow_dispatch'
