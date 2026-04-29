@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build example app
+        env:
+          VRTX_CLIENT_ID: ${{ secrets.VRTX_CLIENT_ID }}
+          VRTX_CLIENT_SECRET: ${{ secrets.VRTX_CLIENT_SECRET }}
+          VRTX_ENVIRONMENT: staging
+        run: ./gradlew -p example :app:assembleDebug
