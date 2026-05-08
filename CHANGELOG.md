@@ -1,4 +1,6 @@
-## 0.3.24 — 2026-05-06
+## 0.3.25 — 2026-05-08
+
+- Reduced Sdk size by replacing external icon library with local assets, enabled R8 optimization, speed up the startup time and simplify the contract and make it clean.## 0.3.24 — 2026-05-06
 
 Manual SDK release 0.0.10## 0.3.23 — 2026-05-05
 
