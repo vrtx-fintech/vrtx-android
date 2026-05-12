@@ -1,8 +1,6 @@
-# Vrtx Android SDK
+# vrtx-android
 
-The official Android SDK for **Vrtx** — drop-in onboarding, wallet, and card issuance flows for your app.
-
-One call brings up a fully managed UI: KYC, wallet provisioning, virtual and physical card issuance, transactions, and card controls. Authentication, session refresh, biometrics, and theming are handled for you.
+The official Android SDK for **Vrtx** — onboarding, wallet, and card flows for your app.
 
 ## Requirements
 
