@@ -66,8 +66,6 @@ class MainActivity : ComponentActivity() {
 
 `Vrtx.setup` authenticates with Vrtx and then launches the SDK's own activity. It is not a suspend function — call it from anywhere; callbacks are delivered on the main thread.
 
-> **Security:** never ship a real `clientSecret` in your APK. Inject it from `local.properties` via `BuildConfig`, or — recommended for production — fetch it from your backend at runtime.
-
 ## Appearance
 
 `Vrtx.setup` accepts:
