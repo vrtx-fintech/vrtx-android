@@ -1,21 +1,22 @@
-# vrtx-android
+# Vrtx Android SDK
 
-The official Android SDK for **Vrtx** — onboarding, wallet, and card flows for your app.
+The official Android SDK for **Vrtx** — drop-in onboarding, wallet, and card issuance flows for your app.
+
+One call brings up a fully managed UI: KYC, wallet provisioning, virtual and physical card issuance, transactions, and card controls. Authentication, session refresh, biometrics, and theming are handled for you.
 
 ## Requirements
 
-|                      | Minimum                                                       |
-| -------------------- | ------------------------------------------------------------- |
-| Android `minSdk`     | 26                                                            |
-| Android `compileSdk` | 36                                                            |
-| AGP                  | 8.13                                                          |
-| Kotlin               | 2.3                                                           |
-| JVM                  | 21                                                            |
-| Host activity        | `androidx.fragment.app.FragmentActivity` (biometric uses it)  |
+| Tooling              | Minimum |
+| -------------------- | ------- |
+| Android `minSdk`     | 29      |
+| Android `compileSdk` | 36      |
+| Android Gradle Plugin| 8.13    |
+| Kotlin               | 2.3     |
+| JVM target           | 21      |
 
 ## Install
 
-Add `mavenCentral()` to your repositories, then declare the dependency.
+Add Maven Central to your repositories and declare the dependency.
 
 ```kotlin
 // settings.gradle.kts
@@ -30,64 +31,60 @@ dependencyResolutionManagement {
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("io.github.abdel-monaam-aouini:vrtx-sdk-android:0.0.3")
+    implementation("sa.vrtx.sa:vrtx-android:0.0.10")
 }
 ```
-
-That's it. Make sure your activity is a `FragmentActivity` and your `compileSdk` / `minSdk` match the requirements above.
 
 ## Quick start
 
 ```kotlin
+import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.fragment.app.FragmentActivity
-import kotlinx.coroutines.launch
-import sa.vrtx.android.Vrtx
-import sa.vrtx.sdk.SdkConfig
-import sa.vrtx.sdk.domain.models.Environment
+import androidx.compose.ui.text.font.FontFamily
+import sa.vrtx.public.Vrtx
+import sa.vrtx.public.configuration.Environment
 
-class MainActivity : FragmentActivity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val scope = rememberCoroutineScope()
             Button(onClick = {
-                scope.launch {
-                    Vrtx.init(
-                        activity = this@MainActivity,
-                        config = SdkConfig(
-                            environment = Environment.Staging,
-                            clientId = "YOUR_CLIENT_ID",
-                            clientSecret = "YOUR_CLIENT_SECRET",
-                        ),
-                        onError = { error -> /* show toast / log */ },
-                        onExit = { /* user closed the SDK */ },
-                    )
-                }
-            }) { Text("Launch vrtx Pay") }
+                Vrtx.setup(
+                    clientId = BuildConfig.VRTX_CLIENT_ID,
+                    clientSecret = BuildConfig.VRTX_CLIENT_SECRET,
+                    environment = Environment.Sandbox,
+                    fontFamily = FontFamily.Default,
+                    onSuccess = { /* SDK UI launched */ },
+                    onError = { error -> /* surface to the user */ },
+                )
+            }) { Text("Launch Vrtx Pay") }
         }
     }
 }
 ```
 
-`Vrtx.init` is a **suspend** function — call it from a coroutine. It authenticates with vrtx and then launches the SDK's own activity.
+`Vrtx.setup` authenticates with Vrtx and then launches the SDK's own activity. It is not a suspend function — call it from anywhere; callbacks are delivered on the main thread.
 
-## Configuration
+> **Security:** never ship a real `clientSecret` in your APK. Inject it from `local.properties` via `BuildConfig`, or — recommended for production — fetch it from your backend at runtime.
 
-`SdkConfig`:
+## Appearance
 
-| Field | Required | Default | Notes |
-| --- | --- | --- | --- |
-| `environment` | ✓ | — | `Environment.Sandbox` or `Environment.Staging` |
-| `clientId` | ✓ | — | Provided by vrtx for your business client |
-| `clientSecret` | ✓ | — | Provided by vrtx — keep it out of source control (use BuildConfig from `local.properties`, or a backend) |
-| `language` | | `Language.English` | `Language.Arabic` available |
-| `theme` | | `SdkTheme.LIGHT` | `LIGHT` / `DARK` |
-| `cardType` | | `INDIVIDUAL_VIRTUAL_DEBIT_CARD` | Or `INDIVIDUAL_PHYSICAL_DEBIT_CARD` |
+`Vrtx.setup` accepts:
+
+- `themeMode: ThemeMode.LIGHT` or `ThemeMode.DARK` to match your app's appearance.
+- `fontFamily:` — pass a Compose `FontFamily` built from a font already embedded in your app (e.g. Inter).
+
+## Localization
+
+Supported languages: English and Arabic. Pass `language = Language.English` or `language = Language.Arabic` when calling `Vrtx.setup`.
+
+## Support
+
+For credentials, license keys, and integration help, contact your Vrtx account manager or [support@vrtx.sa](mailto:support@vrtx.sa).
 
 ## License
 
-Licensed under the [Apache License, Version 2.0](LICENSE). Copyright © 2026 vrtx fintech.
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for the full text.

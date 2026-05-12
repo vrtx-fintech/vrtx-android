@@ -15,7 +15,7 @@ fun localProperty(key: String, default: String = ""): String =
     (localProperties.getProperty(key) ?: System.getenv(key) ?: default)
 
 val sdkVersion: String =
-    (project.findProperty("sdkVersion") as String?) ?: "0.0.6"
+    (project.findProperty("sdkVersion") as String?) ?: "0.0.10"
 
 android {
     namespace = "sa.vrtx.example"
@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId = "sa.vrtx.example"
-        minSdk = 26
+        minSdk = 29
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -73,7 +73,7 @@ kotlin {
 
 dependencies {
     // Pulls the SDK from Maven Central. Override at build time with -PsdkVersion=<tag>.
-    implementation("io.github.abdel-monaam-aouini:vrtx-android:$sdkVersion")
+    implementation("sa.vrtx.sa:vrtx-android:$sdkVersion")
 
     implementation(platform("androidx.compose:compose-bom:2025.12.01"))
     implementation("androidx.compose.foundation:foundation")

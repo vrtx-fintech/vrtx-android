@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -32,27 +33,42 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
-import kotlinx.coroutines.launch
-import sa.vrtx.android.Vrtx
 import sa.vrtx.example.BuildConfig
-import sa.vrtx.sdk.SdkConfig
-import sa.vrtx.sdk.domain.models.Environment
+import sa.vrtx.public.Vrtx
+import sa.vrtx.public.configuration.Environment
+import sa.vrtx.public.configuration.Language
 
 private val vrtxEnvironment: Environment =
     Environment.entries.find { it.name.equals(BuildConfig.VRTX_ENVIRONMENT, ignoreCase = true) }
         ?: Environment.Sandbox
+
+private val InterFontFamily = FontFamily(
+    Font(R.font.inter_regular, FontWeight.Normal),
+    Font(R.font.inter_medium, FontWeight.Medium),
+    Font(R.font.inter_semibold, FontWeight.SemiBold),
+    Font(R.font.inter_bold, FontWeight.Bold),
+)
+
+private val IbmPlexSansArabicFontFamily = FontFamily(
+    Font(R.font.ibm_plex_sans_arabic_regular, FontWeight.Normal),
+    Font(R.font.ibm_plex_sans_arabic_medium, FontWeight.Medium),
+    Font(R.font.ibm_plex_sans_arabic_semibold, FontWeight.SemiBold),
+    Font(R.font.ibm_plex_sans_arabic_bold, FontWeight.Bold),
+)
 
 private val AtlasTeal = Color(0xFF0E5C56)
 private val AtlasBackground = Color(0xFFF5F1EA)
@@ -74,17 +90,17 @@ class MainActivity : FragmentActivity() {
                     onSurface = AtlasOnSurface,
                 ),
             ) {
-                WelcomeScreen(activity = this)
+                WelcomeScreen()
             }
         }
     }
 }
 
 @Composable
-private fun WelcomeScreen(activity: FragmentActivity) {
+private fun WelcomeScreen() {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     var selectedTab by remember { mutableIntStateOf(2) }
+    var language by remember { mutableStateOf(Language.English) }
 
     Scaffold(
         containerColor = AtlasBackground,
@@ -169,6 +185,23 @@ private fun WelcomeScreen(activity: FragmentActivity) {
                 color = AtlasMuted,
             )
             Spacer(modifier = Modifier.weight(0.3f))
+            OutlinedButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(28.dp),
+                onClick = {
+                    language = if (language == Language.English) Language.Arabic else Language.English
+                },
+            ) {
+                Text(
+                    text = if (language == Language.English) "English" else "العربية",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp,
+                    color = AtlasOnSurface,
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -179,21 +212,18 @@ private fun WelcomeScreen(activity: FragmentActivity) {
                     contentColor = Color.White,
                 ),
                 onClick = {
-                    scope.launch {
-                        Vrtx.init(
-                            activity = activity,
-                            config = SdkConfig(
-                                environment = vrtxEnvironment,
-                                clientId = BuildConfig.VRTX_CLIENT_ID,
-                                clientSecret = BuildConfig.VRTX_CLIENT_SECRET,
-                            ),
-                            onError = { err ->
-                                Toast
-                                    .makeText(context, "Init failed: ${err.message}", Toast.LENGTH_LONG)
-                                    .show()
-                            },
-                        )
-                    }
+                    Vrtx.setup(
+                        clientId = BuildConfig.VRTX_CLIENT_ID,
+                        clientSecret = BuildConfig.VRTX_CLIENT_SECRET,
+                        environment = vrtxEnvironment,
+                        language = language,
+                        fontFamily = if (language == Language.English) InterFontFamily else IbmPlexSansArabicFontFamily,
+                        onError = { err ->
+                            Toast
+                                .makeText(context, "Setup failed: ${err.message}", Toast.LENGTH_LONG)
+                                .show()
+                        },
+                    )
                 },
             ) {
                 Text("Get started", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
