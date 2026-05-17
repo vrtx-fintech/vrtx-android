@@ -44,6 +44,8 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.text.font.FontFamily
 import sa.vrtx.public.Vrtx
 import sa.vrtx.public.configuration.Environment
+import sa.vrtx.public.configuration.Language
+import sa.vrtx.public.configuration.Mode
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +56,8 @@ class MainActivity : ComponentActivity() {
                     clientId = BuildConfig.VRTX_CLIENT_ID,
                     clientSecret = BuildConfig.VRTX_CLIENT_SECRET,
                     environment = Environment.Sandbox,
+                    language = Language.English,
+                    mode = Mode.LIGHT,
                     fontFamily = FontFamily.Default,
                     onSuccess = { /* SDK UI launched */ },
                     onError = { error -> /* surface to the user */ },
@@ -66,16 +70,17 @@ class MainActivity : ComponentActivity() {
 
 `Vrtx.setup` authenticates with Vrtx and then launches the SDK's own activity. It is not a suspend function — call it from anywhere; callbacks are delivered on the main thread.
 
-## Appearance
+## Contract
 
-`Vrtx.setup` accepts:
+`Vrtx.setup` accepts these public configuration enums:
 
-- `themeMode: ThemeMode.LIGHT` or `ThemeMode.DARK` to match your app's appearance.
-- `fontFamily:` — pass a Compose `FontFamily` built from a font already embedded in your app (e.g. Inter).
+| Parameter | Enum | Values |
+| --------- | ---- | ------ |
+| `environment` | `Environment` | `Environment.Sandbox`, `Environment.Staging` |
+| `language` | `Language` | `Language.English`, `Language.Arabic` |
+| `mode` | `Mode` | `Mode.LIGHT`, `Mode.DARK` |
 
-## Localization
-
-Supported languages: English and Arabic. Pass `language = Language.English` or `language = Language.Arabic` when calling `Vrtx.setup`.
+For appearance, pass `mode` and a Compose `fontFamily` built from a font already embedded in your app, such as Inter.
 
 ## Support
 

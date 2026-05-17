@@ -51,6 +51,7 @@ import sa.vrtx.example.BuildConfig
 import sa.vrtx.public.Vrtx
 import sa.vrtx.public.configuration.Environment
 import sa.vrtx.public.configuration.Language
+import sa.vrtx.public.configuration.Mode
 
 private val vrtxEnvironment: Environment =
     Environment.entries.find { it.name.equals(BuildConfig.VRTX_ENVIRONMENT, ignoreCase = true) }
@@ -101,6 +102,7 @@ private fun WelcomeScreen() {
     val context = LocalContext.current
     var selectedTab by remember { mutableIntStateOf(2) }
     var language by remember { mutableStateOf(Language.English) }
+    var mode by remember { mutableStateOf(Mode.LIGHT) }
 
     Scaffold(
         containerColor = AtlasBackground,
@@ -202,6 +204,23 @@ private fun WelcomeScreen() {
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
+            OutlinedButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(28.dp),
+                onClick = {
+                    mode = if (mode == Mode.LIGHT) Mode.DARK else Mode.LIGHT
+                },
+            ) {
+                Text(
+                    text = if (mode == Mode.LIGHT) "Light" else "Dark",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp,
+                    color = AtlasOnSurface,
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -217,6 +236,7 @@ private fun WelcomeScreen() {
                         clientSecret = BuildConfig.VRTX_CLIENT_SECRET,
                         environment = vrtxEnvironment,
                         language = language,
+                        mode = mode,
                         fontFamily = if (language == Language.English) InterFontFamily else IbmPlexSansArabicFontFamily,
                         onError = { err ->
                             Toast
