@@ -1,4 +1,6 @@
-## 0.0.10 — 2026-05-12
+## 0.0.11 — 2026-05-17
+
+remove SDK Application dependency for host app compatibility## 0.0.10 — 2026-05-12
 
 Manual SDK release## 0.3.25 — 2026-05-08
 
