@@ -23,4 +23,5 @@ jobs:
           VRTX_CLIENT_ID: ${{ secrets.VRTX_CLIENT_ID }}
           VRTX_CLIENT_SECRET: ${{ secrets.VRTX_CLIENT_SECRET }}
           VRTX_ENVIRONMENT: staging
-        run: ./gradlew -p example :app:assembleDebug
+          SDK_VERSION: 0.0.11
+        run: ./gradlew -p example :app:assembleDebug -PsdkVersion=$SDK_VERSION
