@@ -4,6 +4,8 @@ on:
   pull_request:
   push:
     branches: [main]
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -23,4 +25,10 @@ jobs:
           VRTX_CLIENT_ID: ${{ secrets.VRTX_CLIENT_ID }}
           VRTX_CLIENT_SECRET: ${{ secrets.VRTX_CLIENT_SECRET }}
           VRTX_ENVIRONMENT: staging
-        run: ./gradlew -p example :app:assembleDebug
+          SDK_VERSION: ${{ github.event_name == 'release' && github.event.release.tag_name || '' }}
+        run: |
+          if [ -n "$SDK_VERSION" ]; then
+            ./gradlew -p example :app:assembleDebug -PsdkVersion="$SDK_VERSION"
+          else
+            ./gradlew -p example :app:assembleDebug
+          fi
