@@ -9,7 +9,7 @@ The official Android SDK for **Vrtx** — onboarding, wallet, and card flows for
 | Android `minSdk`     | 29      |
 | Android `compileSdk` | 36      |
 | Android Gradle Plugin| 8.13    |
-| Kotlin               | 2.3     |
+| Kotlin               | 2.1     |
 | JVM target           | 21      |
 
 ## Install
@@ -29,7 +29,7 @@ dependencyResolutionManagement {
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("sa.vrtx.sa:vrtx-android:0.0.11")
+    implementation("sa.vrtx.sa:vrtx-android:0.0.12")
 }
 ```
 
