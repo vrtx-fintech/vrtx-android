@@ -53,8 +53,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             Button(onClick = {
                 Vrtx.setup(
-                    clientId = BuildConfig.VRTX_CLIENT_ID,
-                    clientSecret = BuildConfig.VRTX_CLIENT_SECRET,
+                    clientId = 'VRTX_CLIENT_ID',
+                    clientSecret = 'VRTX_CLIENT_SECRET',
                     environment = Environment.Sandbox,
                     language = Language.English,
                     mode = Mode.LIGHT,
