@@ -10,7 +10,7 @@ The official Android SDK for **Vrtx** — onboarding, wallet, and card flows for
 | Android `compileSdk` | 36      |
 | Android Gradle Plugin| 8.13    |
 | Kotlin               | 2.1     |
-| JVM target           | 21      |
+| JVM target           | 17      |
 
 ## Install
 
