@@ -36,36 +36,16 @@ dependencies {
 ## Quick start
 
 ```kotlin
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.ui.text.font.FontFamily
-import sa.vrtx.public.Vrtx
-import sa.vrtx.public.configuration.Environment
-import sa.vrtx.public.configuration.Language
-import sa.vrtx.public.configuration.Mode
-
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            Button(onClick = {
-                Vrtx.setup(
-                    clientId = "VRTX_CLIENT_ID",
-                    clientSecret = "VRTX_CLIENT_SECRET",
-                    environment = Environment.Sandbox,
-                    language = Language.English,
-                    mode = Mode.LIGHT,
-                    fontFamily = FontFamily.Default,
-                    onSuccess = { /* SDK UI launched */ },
-                    onError = { error -> /* surface to the user */ },
-                )
-            }) { Text("Launch Vrtx Pay") }
-        }
-    }
-}
+Vrtx.setup(
+    clientId = "VRTX_CLIENT_ID",
+    clientSecret = "VRTX_CLIENT_SECRET",
+    environment = Environment.Sandbox,
+    language = Language.English,
+    mode = Mode.LIGHT,
+    fontFamily = FontFamily.Default,
+    onSuccess = { /* SDK UI launched */ },
+    onError = { error -> /* surface to the user */ },
+)
 ```
 
 `Vrtx.setup` authenticates with Vrtx and then launches the SDK's own activity. It is not a suspend function — call it from anywhere; callbacks are delivered on the main thread.
