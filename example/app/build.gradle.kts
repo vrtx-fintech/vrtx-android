@@ -75,7 +75,7 @@ dependencies {
     // Pulls the SDK from Maven Central. Override at build time with -PsdkVersion=<tag>.
     implementation("sa.vrtx.sa:vrtx-android:$sdkVersion")
 
-    implementation(platform("androidx.compose:compose-bom:2026.05.00"))
+    implementation(platform("androidx.compose:compose-bom:2026.05.01"))
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
