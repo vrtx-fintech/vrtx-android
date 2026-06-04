@@ -1,4 +1,6 @@
-## 0.0.13 — 2026-06-04
+## 0.0.14 — 2026-06-04
+
+optimize wallet session observation and handle device revocation state ## 0.0.13 — 2026-06-04
 
 add support for external reference in onboarding ## 0.0.12 — 2026-05-17
 
