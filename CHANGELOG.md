@@ -1,4 +1,6 @@
-## 0.0.12 — 2026-05-17
+## 0.0.13 — 2026-06-04
+
+add support for external reference in onboarding ## 0.0.12 — 2026-05-17
 
 publish Kotlin 2.1-compatible Android artifact## 0.0.11 — 2026-05-17
 
