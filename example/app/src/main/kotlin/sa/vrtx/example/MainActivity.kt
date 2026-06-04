@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
+import java.util.UUID
 import sa.vrtx.example.BuildConfig
 import sa.vrtx.public.Vrtx
 import sa.vrtx.public.configuration.Environment
@@ -238,6 +239,7 @@ private fun WelcomeScreen() {
                         language = language,
                         mode = mode,
                         fontFamily = if (language == Language.English) InterFontFamily else IbmPlexSansArabicFontFamily,
+                        externalReference = UUID.randomUUID().toString(),
                         onError = { err ->
                             Toast
                                 .makeText(context, "Setup failed: ${err.message}", Toast.LENGTH_LONG)
