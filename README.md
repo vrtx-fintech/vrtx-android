@@ -29,7 +29,7 @@ dependencyResolutionManagement {
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("sa.vrtx.sa:vrtx-android:0.0.12")
+    implementation("sa.vrtx.sa:vrtx-android:0.0.13")
 }
 ```
 
@@ -43,6 +43,7 @@ Vrtx.setup(
     language = Language.English,
     mode = Mode.LIGHT,
     fontFamily = FontFamily.Default,
+    externalReference = "YOUR_EXTERNAL_REFERENCE",
     onSuccess = { /* SDK UI launched */ },
     onError = { error -> /* surface to the user */ },
 )
@@ -61,6 +62,8 @@ Vrtx.setup(
 | `mode` | `Mode` | `Mode.LIGHT`, `Mode.DARK` |
 
 For appearance, pass `mode` and a Compose `fontFamily` built from a font already embedded in your app, such as Inter.
+
+Pass `externalReference` as a string when your app needs to attach its own reference to the SDK session. Omit it when no external reference is needed. The example app sends a generated UUID string.
 
 ## Support
 
