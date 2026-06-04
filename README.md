@@ -53,17 +53,18 @@ Vrtx.setup(
 
 ## Contract
 
-`Vrtx.setup` accepts these public configuration enums:
+`Vrtx.setup` accepts these public configuration types:
 
-| Parameter | Enum | Values |
+| Parameter | Type | Values |
 | --------- | ---- | ------ |
 | `environment` | `Environment` | `Environment.Sandbox`, `Environment.Staging` |
 | `language` | `Language` | `Language.English`, `Language.Arabic` |
 | `mode` | `Mode` | `Mode.LIGHT`, `Mode.DARK` |
+| `externalReference` | `String?` | Optional app-defined reference attached to the SDK session |
 
 For appearance, pass `mode` and a Compose `fontFamily` built from a font already embedded in your app, such as Inter.
 
-Pass `externalReference` as a string when your app needs to attach its own reference to the SDK session. Omit it when no external reference is needed. The example app sends a generated UUID string.
+Omit `externalReference` when no external reference is needed. The example app sends a generated UUID string.
 
 ## Support
 
