@@ -1,4 +1,6 @@
-## 0.0.15 — 2026-06-15
+## 0.0.16 — 2026-06-15
+
+Manual SDK release - testing maven upload## 0.0.15 — 2026-06-15
 
 Added manual physical card activation flow. Fixed card settings option issues. Improved handling of unknown session statuses during polling. Standardized localized string keys using error codes. Upgraded to Kotlin 2.4.0 and migrated to Version Catalog. Updated dependencies and build tooling for stability and maintenance.## 0.0.14 — 2026-06-04
 
