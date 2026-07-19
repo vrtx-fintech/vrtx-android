@@ -35,6 +35,18 @@ dependencies {
 }
 ```
 
+Configure the manifest placeholders required by the SDK.
+
+```kotlin
+// app/build.gradle.kts
+android {
+    defaultConfig {
+        manifestPlaceholders["vrtxPackageName"] = applicationId ?: ""
+        manifestPlaceholders["vrtxCertHash"] = "YOUR_CERT_HASH"
+    }
+}
+```
+
 ## Quick start
 
 ```kotlin
