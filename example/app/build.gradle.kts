@@ -15,7 +15,7 @@ fun localProperty(key: String, default: String = ""): String =
     (localProperties.getProperty(key) ?: System.getenv(key) ?: default)
 
 val sdkVersion: String =
-    (project.findProperty("sdkVersion") as String?) ?: "0.0.15"
+    (project.findProperty("sdkVersion") as String?) ?: "0.1.0"
 
 android {
     namespace = "sa.vrtx.example"
