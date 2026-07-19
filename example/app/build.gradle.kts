@@ -2,7 +2,6 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
@@ -15,22 +14,26 @@ fun localProperty(key: String, default: String = ""): String =
     (localProperties.getProperty(key) ?: System.getenv(key) ?: default)
 
 val sdkVersion: String =
-    (project.findProperty("sdkVersion") as String?) ?: "0.0.15"
+    (project.findProperty("sdkVersion") as String?) ?: "0.1.0"
+
+val VRTX_CERT_HASH: String = localProperty("VRTX_CERT_HASH")
 
 android {
     namespace = "sa.vrtx.example"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "sa.vrtx.example"
         minSdk = 29
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
         buildConfigField("String", "VRTX_CLIENT_ID", "\"${localProperty("VRTX_CLIENT_ID")}\"")
         buildConfigField("String", "VRTX_CLIENT_SECRET", "\"${localProperty("VRTX_CLIENT_SECRET")}\"")
         buildConfigField("String", "VRTX_ENVIRONMENT", "\"${localProperty("VRTX_ENVIRONMENT", "Sandbox")}\"")
+        manifestPlaceholders["vrtxPackageName"] = applicationId ?: ""
+        manifestPlaceholders["vrtxCertHash"] = VRTX_CERT_HASH
     }
 
     compileOptions {

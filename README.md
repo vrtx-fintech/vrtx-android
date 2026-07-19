@@ -7,20 +7,22 @@ The official Android SDK for **Vrtx** — onboarding, wallet, and card flows for
 | Tooling              | Minimum |
 | -------------------- | ------- |
 | Android `minSdk`     | 29      |
-| Android `compileSdk` | 36      |
-| Android Gradle Plugin| 8.13    |
+| Android `compileSdk` | 37      |
+| Android Gradle Plugin| 9.1     |
 | Kotlin               | 2.1     |
 | JVM target           | 17      |
 
 ## Install
 
-Add Maven Central to your repositories and declare the dependency.
+Add Maven Central, the Talsec freeRASP repository, and JitPack to your repositories, then declare the dependency.
 
 ```kotlin
 // settings.gradle.kts
 dependencyResolutionManagement {
     repositories {
         google()
+        maven("https://europe-west3-maven.pkg.dev/talsec-artifact-repository/freerasp")
+        maven("https://jitpack.io")
         mavenCentral()
     }
 }
@@ -29,7 +31,19 @@ dependencyResolutionManagement {
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("sa.vrtx.sa:vrtx-android:0.0.15")
+    implementation("sa.vrtx.sa:vrtx-android:0.1.0")
+}
+```
+
+Configure the manifest placeholders required by the SDK.
+
+```kotlin
+// app/build.gradle.kts
+android {
+    defaultConfig {
+        manifestPlaceholders["vrtxPackageName"] = applicationId ?: ""
+        manifestPlaceholders["vrtxCertHash"] = "YOUR_CERT_HASH"
+    }
 }
 ```
 
