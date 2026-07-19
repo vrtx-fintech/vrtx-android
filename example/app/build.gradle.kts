@@ -16,6 +16,8 @@ fun localProperty(key: String, default: String = ""): String =
 val sdkVersion: String =
     (project.findProperty("sdkVersion") as String?) ?: "0.1.0"
 
+val VRTX_CERT_HASH: String = localProperty("VRTX_CERT_HASH")
+
 android {
     namespace = "sa.vrtx.example"
     compileSdk = 37
@@ -30,6 +32,8 @@ android {
         buildConfigField("String", "VRTX_CLIENT_ID", "\"${localProperty("VRTX_CLIENT_ID")}\"")
         buildConfigField("String", "VRTX_CLIENT_SECRET", "\"${localProperty("VRTX_CLIENT_SECRET")}\"")
         buildConfigField("String", "VRTX_ENVIRONMENT", "\"${localProperty("VRTX_ENVIRONMENT", "Sandbox")}\"")
+        manifestPlaceholders["vrtxPackageName"] = applicationId ?: ""
+        manifestPlaceholders["vrtxCertHash"] = VRTX_CERT_HASH
     }
 
     compileOptions {
