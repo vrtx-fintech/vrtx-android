@@ -2,7 +2,6 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
@@ -19,12 +18,12 @@ val sdkVersion: String =
 
 android {
     namespace = "sa.vrtx.example"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "sa.vrtx.example"
         minSdk = 29
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
