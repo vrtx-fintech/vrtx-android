@@ -1,4 +1,6 @@
-## 0.0.16 — 2026-06-15
+## 0.1.0 — 2026-07-19
+
+Release MVC Requirement 3.1 / 3.8## 0.0.16 — 2026-06-15
 
 Manual SDK release - testing maven upload## 0.0.15 — 2026-06-15
 
