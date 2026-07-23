@@ -47,6 +47,40 @@ android {
 }
 ```
 
+### Generating your Certificate Hash
+
+The SDK uses the certificate hash to verify app integrity and prevent repackaging. freeRASP requires the **SHA-256** hash of your signing certificate, converted to **Base64** format.
+
+**1. Get the SHA-256 fingerprint**
+
+Open your terminal and run the following `keytool` command:
+
+```bash
+keytool -list -v -keystore path/to/your/keystore.jks -alias your_alias
+```
+
+*(For the standard debug keystore, the path is `~/.android/debug.keystore`, the alias is `androiddebugkey`, and the password is `android`)*.
+
+Enter your keystore password when prompted. Look for the `SHA256:` fingerprint in the output. It will look like this:
+
+```text
+SHA256: 4D:5E:6F:7A:8B:9C:0D:1E:2F:3A:4B:5C:6D:7E:8F:9A:0B:1C:2D:3E:4F:5A:6B:7C:8D:9E:0F:1A:2B:3C:4D:5E
+```
+
+**2. Convert the hex string to Base64**
+
+Run this command (replace the hex string with your own from the previous step):
+
+```bash
+echo -n "4D:5E:6F:7A:8B:9C:0D:1E:2F:3A:4B:5C:6D:7E:8F:9A:0B:1C:2D:3E:4F:5A:6B:7C:8D:9E:0F:1A:2B:3C:4D:5E" | tr -d ':' | xxd -r -p | base64
+```
+
+*(If `xxd` is not available, you can use Python: `python3 -c "import base64; print(base64.b64encode(bytes.fromhex('4D5E6F...')).decode())"`)*
+
+**3. Add it to your Gradle file**
+
+Copy the resulting Base64 string (e.g., `TV5veoucDR4KOktcbX6Pm...==`) and paste it into your `vrtxCertHash` manifest placeholder. You can provide multiple hashes (e.g., debug and release) separated by commas.
+
 ## Quick start
 
 ```kotlin
