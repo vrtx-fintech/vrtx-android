@@ -105,7 +105,7 @@ Vrtx.setup(
 
 | Parameter | Type | Values |
 | --------- | ---- | ------ |
-| `environment` | `Environment` | `Environment.Sandbox`, `Environment.Staging` |
+| `environment` | `Environment` | `Environment.Sandbox`, `Environment.Production` |
 | `language` | `Language` | `Language.English`, `Language.Arabic` |
 | `mode` | `Mode` | `Mode.LIGHT`, `Mode.DARK` |
 | `externalReference` | `String?` | Optional app-defined reference attached to the SDK session |
