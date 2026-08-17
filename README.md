@@ -31,7 +31,7 @@ dependencyResolutionManagement {
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("sa.vrtx.sa:vrtx-android:0.1.0")
+    implementation("sa.vrtx.sa:vrtx-android:0.1.1")
 }
 ```
 
