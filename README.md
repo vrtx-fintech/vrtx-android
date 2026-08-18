@@ -9,7 +9,7 @@ The official Android SDK for **Vrtx** — onboarding, wallet, and card flows for
 | Android `minSdk`     | 29      |
 | Android `compileSdk` | 37      |
 | Android Gradle Plugin| 9.1     |
-| Kotlin               | 2.1     |
+| Kotlin               | 2.4.10    |
 | JVM target           | 17      |
 
 ## Install
@@ -46,8 +46,39 @@ android {
     }
 }
 ```
+## Resolve manifest merger conflicts
+The SDK enforces strict security defaults by disabling app backups and cleartext HTTP traffic (android:allowBackup="false", android:fullBackupContent="false", and android:usesCleartextTraffic="false") to prevent sensitive data extraction and man-in-the-middle attacks.
 
-### Generating your Certificate Hash
+If your app currently enables backups or cleartext traffic (for example, android:allowBackup="true", android:fullBackupContent="@xml/backup_rules", or android:usesCleartextTraffic="true"), the Gradle manifest merger will fail with conflicts like:
+```
+Attribute application@allowBackup value=(true) from AndroidManifest.xml
+is also present at [sa.vrtx.sa:vrtx-android:0.1.1] AndroidManifest.xml value=(false).
+
+Attribute application@fullBackupContent value=(@xml/backup_rules) from AndroidManifest.xml
+is also present at [sa.vrtx.sa:vrtx-android:0.1.1] AndroidManifest.xml value=(false).
+
+Attribute application@usesCleartextTraffic value=(true) from AndroidManifest.xml
+is also present at [sa.vrtx.sa:vrtx-android:0.1.1] AndroidManifest.xml value=(false).
+```
+To resolve this and align with the SDK's security requirements, update your app's AndroidManifest.xml to explicitly disable backups and cleartext traffic, and remove any custom backup rules:
+
+```xml
+<!-- app/src/main/AndroidManifest.xml -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:usesCleartextTraffic="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        tools:targetApi="31">
+        ...
+    </application>
+</manifest>
+```
+> _Note: If you need to enforce other conflicting attributes on your <application> tag, you can use tools:replace="android:allowBackup" but ensure you keep the values set to false._
+
+## Generating your Certificate Hash
 
 The SDK uses the certificate hash to verify app integrity and prevent repackaging. freeRASP requires the **SHA-256** hash of your signing certificate, converted to **Base64** format.
 
