@@ -101,11 +101,19 @@ jobs:
             && test -n "$ANDROID_KEY_ALIAS" \
             && test -n "$ANDROID_KEY_PASSWORD"
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/android-release.jks"
-          keytool -certreq -alias "$ANDROID_KEY_ALIAS" \
+          if ! keytool -list -keystore "$RUNNER_TEMP/android-release.jks" \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" >/dev/null 2>&1; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 and ANDROID_KEYSTORE_PASSWORD do not describe the same keystore."
+            exit 1
+          fi
+          if ! keytool -certreq -alias "$ANDROID_KEY_ALIAS" \
             -keystore "$RUNNER_TEMP/android-release.jks" \
             -storepass "$ANDROID_KEYSTORE_PASSWORD" \
             -keypass "$ANDROID_KEY_PASSWORD" \
-            -file "$RUNNER_TEMP/android-release.csr" >/dev/null
+            -file "$RUNNER_TEMP/android-release.csr" >/dev/null 2>&1; then
+            echo "::error::ANDROID_KEY_ALIAS or ANDROID_KEY_PASSWORD is invalid for this keystore."
+            exit 1
+          fi
           rm -f "$RUNNER_TEMP/android-release.csr"
 
       - name: Build signed Sandbox release APK
