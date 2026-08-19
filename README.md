@@ -12,7 +12,7 @@ The official Android SDK for **Vrtx** — onboarding, wallet, and card flows for
 | Kotlin               | 2.4.10    |
 | JVM target           | 17      |
 
-## Install
+## 1. Add the SDK
 
 Add Maven Central, the Talsec freeRASP repository, and JitPack to your repositories, then declare the dependency.
 
@@ -31,11 +31,13 @@ dependencyResolutionManagement {
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("sa.vrtx.sa:vrtx-android:0.1.1")
+    implementation("sa.vrtx.sa:vrtx-android:0.1.6")
 }
 ```
 
-Configure the manifest placeholders required by the SDK.
+The SDK requires `compileSdk` 37 or higher. Configure the required manifest
+placeholders in your app module, using your final application ID and the
+Base64-encoded SHA-256 certificate hash described below.
 
 ```kotlin
 // app/build.gradle.kts
@@ -46,21 +48,28 @@ android {
     }
 }
 ```
-## Resolve manifest merger conflicts
-The SDK enforces strict security defaults by disabling app backups and cleartext HTTP traffic (android:allowBackup="false", android:fullBackupContent="false", and android:usesCleartextTraffic="false") to prevent sensitive data extraction and man-in-the-middle attacks.
 
-If your app currently enables backups or cleartext traffic (for example, android:allowBackup="true", android:fullBackupContent="@xml/backup_rules", or android:usesCleartextTraffic="true"), the Gradle manifest merger will fail with conflicts like:
+## 2. Align manifest security settings
+
+The SDK enforces strict security defaults: backups and cleartext HTTP traffic
+are disabled. If your app currently enables either, the manifest merger will
+report a conflict.
+
+For example:
+
 ```
 Attribute application@allowBackup value=(true) from AndroidManifest.xml
-is also present at [sa.vrtx.sa:vrtx-android:0.1.1] AndroidManifest.xml value=(false).
+is also present at [sa.vrtx.sa:vrtx-android:0.1.6] AndroidManifest.xml value=(false).
 
 Attribute application@fullBackupContent value=(@xml/backup_rules) from AndroidManifest.xml
-is also present at [sa.vrtx.sa:vrtx-android:0.1.1] AndroidManifest.xml value=(false).
+is also present at [sa.vrtx.sa:vrtx-android:0.1.6] AndroidManifest.xml value=(false).
 
 Attribute application@usesCleartextTraffic value=(true) from AndroidManifest.xml
-is also present at [sa.vrtx.sa:vrtx-android:0.1.1] AndroidManifest.xml value=(false).
+is also present at [sa.vrtx.sa:vrtx-android:0.1.6] AndroidManifest.xml value=(false).
 ```
-To resolve this and align with the SDK's security requirements, update your app's AndroidManifest.xml to explicitly disable backups and cleartext traffic, and remove any custom backup rules:
+
+Update the application attributes to match the SDK requirements. Do not override
+these values with `tools:replace`.
 
 ```xml
 <!-- app/src/main/AndroidManifest.xml -->
@@ -76,13 +85,12 @@ To resolve this and align with the SDK's security requirements, update your app'
     </application>
 </manifest>
 ```
-> _Note: If you need to enforce other conflicting attributes on your <application> tag, you can use tools:replace="android:allowBackup" but ensure you keep the values set to false._
 
-## Generating your Certificate Hash
+## 3. Generate your certificate hash
 
 The SDK uses the certificate hash to verify app integrity and prevent repackaging. freeRASP requires the **SHA-256** hash of your signing certificate, converted to **Base64** format.
 
-**1. Get the SHA-256 fingerprint**
+### Get the SHA-256 fingerprint
 
 Open your terminal and run the following `keytool` command:
 
@@ -98,7 +106,7 @@ Enter your keystore password when prompted. Look for the `SHA256:` fingerprint i
 SHA256: 4D:5E:6F:7A:8B:9C:0D:1E:2F:3A:4B:5C:6D:7E:8F:9A:0B:1C:2D:3E:4F:5A:6B:7C:8D:9E:0F:1A:2B:3C:4D:5E
 ```
 
-**2. Convert the hex string to Base64**
+### Convert the hex string to Base64
 
 Run this command (replace the hex string with your own from the previous step):
 
@@ -108,13 +116,22 @@ echo -n "4D:5E:6F:7A:8B:9C:0D:1E:2F:3A:4B:5C:6D:7E:8F:9A:0B:1C:2D:3E:4F:5A:6B:7C
 
 *(If `xxd` is not available, you can use Python: `python3 -c "import base64; print(base64.b64encode(bytes.fromhex('4D5E6F...')).decode())"`)*
 
-**3. Add it to your Gradle file**
+### Add it to Gradle
 
 Copy the resulting Base64 string (e.g., `TV5veoucDR4KOktcbX6Pm...==`) and paste it into your `vrtxCertHash` manifest placeholder. You can provide multiple hashes (e.g., debug and release) separated by commas.
 
-## Quick start
+## 4. Launch the SDK
+
+Import the public API and call `Vrtx.setup` from an activity or another UI
+event. Store credentials outside source control—for example, inject them through
+your build system or use `local.properties` for local development.
 
 ```kotlin
+import sa.vrtx.public.Vrtx
+import sa.vrtx.public.configuration.Environment
+import sa.vrtx.public.configuration.Language
+import sa.vrtx.public.configuration.Mode
+
 Vrtx.setup(
     clientId = "VRTX_CLIENT_ID",
     clientSecret = "VRTX_CLIENT_SECRET",
@@ -128,9 +145,11 @@ Vrtx.setup(
 )
 ```
 
-`Vrtx.setup` authenticates with Vrtx and then launches the SDK's own activity. It is not a suspend function — call it from anywhere; callbacks are delivered on the main thread.
+`Vrtx.setup` authenticates with Vrtx and launches the SDK activity. It is not a
+suspending function. `onSuccess` runs once the SDK UI has launched; use
+`onError` to show an integration-safe error state to the user.
 
-## Contract
+## Configuration reference
 
 `Vrtx.setup` accepts these public configuration types:
 
@@ -143,7 +162,7 @@ Vrtx.setup(
 
 For appearance, pass `mode` and a Compose `fontFamily` built from a font already embedded in your app, such as Inter.
 
-Omit `externalReference` when no external reference is needed. The example app sends a generated UUID string.
+Omit `externalReference` when no external reference is needed.
 
 ## Support
 
