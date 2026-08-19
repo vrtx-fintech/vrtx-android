@@ -33,7 +33,7 @@ jobs:
             exit 0
           fi
           VERSION="${TAG#v}"
-          TITLE="Android SDK ${VERSION} Available"
+          TITLE="✨ Android SDK v${VERSION} is live"
           if [ -z "${NOTES}" ]; then
             NOTES="See the GitHub release for details."
           fi
@@ -42,13 +42,23 @@ jobs:
           MAVEN_URL="https://central.sonatype.com/artifact/sa.vrtx.sa/vrtx-android/${VERSION}"
           CONTEXT="<${RELEASE_URL}|GitHub release ${TAG}> · <${MAVEN_URL}|Maven Central ${VERSION}>"
           PAYLOAD=$(jq -n \
+            --arg fallback "Android SDK ${VERSION} available" \
             --arg title "${TITLE}" \
+            --arg version "${VERSION}" \
             --arg notes "${NOTES}" \
             --arg context "${CONTEXT}" \
             '{
+              text: $fallback,
               blocks: [
-                {type: "header", text: {type: "plain_text", text: $title}},
-                {type: "section", text: {type: "mrkdwn", text: $notes}},
+                {type: "header", text: {type: "plain_text", text: $title, emoji: true}},
+                {type: "section", fields: [
+                  {type: "mrkdwn", text: "*Version*\nv" + $version},
+                  {type: "mrkdwn", text: "*Status*\n✅ Published"},
+                  {type: "mrkdwn", text: "*Artifact*\n📦 Maven Central"},
+                  {type: "mrkdwn", text: "*Platform*\n🤖 Android"}
+                ]},
+                {type: "divider"},
+                {type: "section", text: {type: "mrkdwn", text: "*Release notes*\n" + $notes}},
                 {type: "context", elements: [{type: "mrkdwn", text: $context}]}
               ]
             }')

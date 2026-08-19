@@ -189,13 +189,25 @@ jobs:
           NOTES="${NOTES:0:2900}"
           TAG_URL="https://github.com/${REPOSITORY}/tree/demo-${VERSION}"
           PAYLOAD=$(jq -n \
-            --arg title "Vrtx Sandbox app ${VERSION} distributed" \
+            --arg fallback "Vrtx Sandbox app ${VERSION} distributed" \
+            --arg title "🚀 Sandbox app v${VERSION} is ready" \
+            --arg version "${VERSION}" \
             --arg notes "$NOTES" \
-            --arg context "<${TAG_URL}|demo-${VERSION}> · Firebase App Distribution" \
-            '{blocks: [
-              {type: "header", text: {type: "plain_text", text: $title}},
-              {type: "section", text: {type: "mrkdwn", text: $notes}},
-              {type: "context", elements: [{type: "mrkdwn", text: $context}]}
+            --arg tag "<${TAG_URL}|🏷️ demo-${VERSION}>" \
+            '{text: $fallback, blocks: [
+              {type: "header", text: {type: "plain_text", text: $title, emoji: true}},
+              {type: "section", fields: [
+                {type: "mrkdwn", text: "*Version*\nv" + $version},
+                {type: "mrkdwn", text: "*Environment*\n🟡 Sandbox"},
+                {type: "mrkdwn", text: "*Delivery*\n📲 Firebase App Distribution"},
+                {type: "mrkdwn", text: "*Status*\n✅ Available to testers"}
+              ]},
+              {type: "divider"},
+              {type: "section", text: {type: "mrkdwn", text: "*What’s new*\n" + $notes}},
+              {type: "context", elements: [
+                {type: "mrkdwn", text: $tag},
+                {type: "mrkdwn", text: "🔐 Signed release"}
+              ]}
             ]}')
           response=$(curl -sS --fail-with-body -X POST \
             -H 'Content-Type: application/json' \
