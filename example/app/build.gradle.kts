@@ -17,6 +17,16 @@ val sdkVersion: String =
     (project.findProperty("sdkVersion") as String?) ?: "0.1.6"
 
 val VRTX_CERT_HASH: String = localProperty("VRTX_CERT_HASH")
+val releaseStoreFile: String = localProperty("ANDROID_KEYSTORE_FILE")
+val releaseStorePassword: String = localProperty("ANDROID_KEYSTORE_PASSWORD")
+val releaseKeyAlias: String = localProperty("ANDROID_KEY_ALIAS")
+val releaseKeyPassword: String = localProperty("ANDROID_KEY_PASSWORD")
+val hasReleaseSigningCredentials = listOf(
+    releaseStoreFile,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword,
+).all(String::isNotBlank)
 
 android {
     namespace = "sa.vrtx.example"
@@ -44,9 +54,20 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            // Sign with the debug keystore for App Distribution test builds.
-            // Replace with a real release signingConfig before shipping.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
+        }
+    }
+
+    signingConfigs {
+        getByName("release") {
+            if (hasReleaseSigningCredentials) {
+                storeFile = file(releaseStoreFile)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            } else {
+                initWith(getByName("debug"))
+            }
         }
     }
 

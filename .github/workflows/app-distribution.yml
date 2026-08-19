@@ -15,7 +15,6 @@ on:
         description: Target environment for app distribution
         options:
           - sandbox
-          - staging
       release_notes:
         type: string
         required: true
@@ -67,12 +66,26 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
 
+      - name: Prepare release keystore
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/android-release.jks"
+
       - name: Build release APK against published SDK
         shell: bash
         env:
           VRTX_CLIENT_ID: ${{ secrets.VRTX_CLIENT_ID }}
           VRTX_CLIENT_SECRET: ${{ secrets.VRTX_CLIENT_SECRET }}
+          VRTX_CERT_HASH: ${{ secrets.VRTX_CERT_HASH }}
           VRTX_ENVIRONMENT: ${{ inputs.environment }}
+          ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/android-release.jks
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           SDK_VERSION: ${{ inputs.sdk_version }}
         run: |
           FLAVOR="${VRTX_ENVIRONMENT^}"  # capitalize first letter: sandbox -> Sandbox
@@ -97,23 +110,17 @@ jobs:
         shell: bash
         env:
           SANDBOX_APP_ID: ${{ secrets.SANDBOX_FIREBASE_APP_ID }}
-          STAGING_APP_ID: ${{ secrets.STAGING_FIREBASE_APP_ID }}
           ENVIRONMENT: ${{ inputs.environment }}
           RELEASE_NOTES: ${{ inputs.release_notes }}
           TESTERS: ${{ secrets.FIREBASE_TESTERS }}
         run: |
-          if [[ "${ENVIRONMENT}" == "sandbox" ]]; then
-            APP_ID="${SANDBOX_APP_ID}"
-          else
-            APP_ID="${STAGING_APP_ID}"
-          fi
           NOTES_FILE=$(mktemp)
           printf '%s' "${RELEASE_NOTES}" > "${NOTES_FILE}"
           TESTERS_FILE=$(mktemp)
           printf '%s' "${TESTERS}" > "${TESTERS_FILE}"
           APK_PATH="example/app/build/outputs/apk/${ENVIRONMENT}/release/app-${ENVIRONMENT}-release.apk"
           firebase appdistribution:distribute "${APK_PATH}" \
-            --app "${APP_ID}" \
+            --app "${SANDBOX_APP_ID}" \
             --release-notes-file "${NOTES_FILE}" \
             --testers-file "${TESTERS_FILE}"
 
