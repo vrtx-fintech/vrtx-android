@@ -197,13 +197,13 @@ jobs:
             '{text: $fallback, blocks: [
               {type: "header", text: {type: "plain_text", text: $title, emoji: true}},
               {type: "section", fields: [
-                {type: "mrkdwn", text: "*Version*\nv" + $version},
+                {type: "mrkdwn", text: ("*Version*\nv" + $version)},
                 {type: "mrkdwn", text: "*Environment*\n🟡 Sandbox"},
                 {type: "mrkdwn", text: "*Delivery*\n📲 Firebase App Distribution"},
                 {type: "mrkdwn", text: "*Status*\n✅ Available to testers"}
               ]},
               {type: "divider"},
-              {type: "section", text: {type: "mrkdwn", text: "*What’s new*\n" + $notes}},
+              {type: "section", text: {type: "mrkdwn", text: ("*What’s new*\n" + $notes)}},
               {type: "context", elements: [
                 {type: "mrkdwn", text: $tag},
                 {type: "mrkdwn", text: "🔐 Signed release"}

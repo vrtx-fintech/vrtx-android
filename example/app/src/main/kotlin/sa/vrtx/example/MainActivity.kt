@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,11 +17,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -146,6 +151,7 @@ private fun WelcomeScreen() {
     var mode by remember { mutableStateOf(Mode.LIGHT) }
     var selectedFontName by remember { mutableStateOf(LatinFontOptions.first().label) }
     var fontMenuExpanded by remember { mutableStateOf(false) }
+    var isLaunching by remember { mutableStateOf(false) }
     val isArabic = language == Language.Arabic
     val isDark = mode == Mode.DARK
     val colorScheme = if (isDark) {
@@ -217,14 +223,14 @@ private fun WelcomeScreen() {
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.weight(0.25f))
-            OutlinedButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(28.dp),
-                border = BorderStroke(1.dp, muted.copy(alpha = 0.45f)),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.onSurface),
-                onClick = {
+            SettingToggle(
+                label = if (isArabic) "اللغة العربية" else "English language",
+                checked = isArabic,
+                fontFamily = appFont,
+                checkedLabel = "العربية",
+                uncheckedLabel = "English",
+                borderColor = muted.copy(alpha = 0.45f),
+                onCheckedChange = {
                     language = if (language == Language.English) Language.Arabic else Language.English
                     selectedFontName = if (language == Language.Arabic) {
                         ArabicFontOptions.first().label
@@ -232,69 +238,29 @@ private fun WelcomeScreen() {
                         LatinFontOptions.first().label
                     }
                 },
-            ) {
-                Text(
-                    text = if (language == Language.English) "English" else "العربية",
-                    fontFamily = appFont,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp,
-                    color = colorScheme.onSurface,
-                )
-            }
+            )
             Spacer(modifier = Modifier.height(12.dp))
-            OutlinedButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(28.dp),
-                border = BorderStroke(1.dp, muted.copy(alpha = 0.45f)),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.onSurface),
-                onClick = {
+            SettingToggle(
+                label = if (isArabic) "المظهر" else "Appearance",
+                checked = isDark,
+                fontFamily = appFont,
+                checkedLabel = if (isArabic) "داكن" else "Dark",
+                uncheckedLabel = if (isArabic) "فاتح" else "Light",
+                borderColor = muted.copy(alpha = 0.45f),
+                onCheckedChange = {
                     mode = if (mode == Mode.LIGHT) Mode.DARK else Mode.LIGHT
                 },
-            ) {
-                Text(
-                    text = if (mode == Mode.LIGHT) "Light" else "Dark",
-                    fontFamily = appFont,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp,
-                    color = colorScheme.onSurface,
-                )
-            }
+            )
             Spacer(modifier = Modifier.height(12.dp))
-            Box(modifier = Modifier.fillMaxWidth()) {
-                OutlinedButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(28.dp),
-                    border = BorderStroke(1.dp, muted.copy(alpha = 0.45f)),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.onSurface),
-                    onClick = { fontMenuExpanded = true },
-                ) {
-                    Text(
-                        text = if (isArabic) "الخط: $selectedFontName" else "Font: $selectedFontName",
-                        fontFamily = appFont,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 16.sp,
-                    )
-                }
-                DropdownMenu(
-                    expanded = fontMenuExpanded,
-                    onDismissRequest = { fontMenuExpanded = false },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    fontOptions.forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(option.label, fontFamily = option.fontFamily) },
-                            onClick = {
-                                selectedFontName = option.label
-                                fontMenuExpanded = false
-                            },
-                        )
-                    }
-                }
-            }
+            FontPicker(
+                selectedFontName = selectedFontName,
+                options = fontOptions,
+                expanded = fontMenuExpanded,
+                label = if (isArabic) "الخط" else "Font",
+                borderColor = muted.copy(alpha = 0.45f),
+                onExpandedChange = { fontMenuExpanded = it },
+                onFontSelected = { selectedFontName = it },
+            )
             Spacer(modifier = Modifier.height(12.dp))
             Button(
                 modifier = Modifier
@@ -305,7 +271,9 @@ private fun WelcomeScreen() {
                     containerColor = AtlasTeal,
                     contentColor = Color.White,
                 ),
+                enabled = !isLaunching,
                 onClick = {
+                    isLaunching = true
                     Vrtx.setup(
                         clientId = BuildConfig.VRTX_CLIENT_ID,
                         clientSecret = BuildConfig.VRTX_CLIENT_SECRET,
@@ -314,7 +282,11 @@ private fun WelcomeScreen() {
                         mode = mode,
                         fontFamily = appFont,
                         externalReference = UUID.randomUUID().toString(),
+                        onSuccess = {
+                            isLaunching = false
+                        },
                         onError = { err ->
+                            isLaunching = false
                             Toast
                                 .makeText(context, "Setup failed: ${err.message}", Toast.LENGTH_LONG)
                                 .show()
@@ -322,10 +294,115 @@ private fun WelcomeScreen() {
                     )
                 },
             ) {
-                Text(if (isArabic) "ابدأ الآن" else "Get started", fontFamily = appFont, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                if (isLaunching) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp,
+                    )
+                } else {
+                    Text(if (isArabic) "ابدأ الآن" else "Get started", fontFamily = appFont, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                }
             }
             Spacer(modifier = Modifier.height(24.dp))
         }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingToggle(
+    label: String,
+    checked: Boolean,
+    checkedLabel: String,
+    uncheckedLabel: String,
+    fontFamily: FontFamily,
+    borderColor: Color,
+    onCheckedChange: () -> Unit,
+) {
+    OutlinedButton(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, borderColor),
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+        onClick = onCheckedChange,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column {
+                Text(label, fontFamily = fontFamily, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                Text(
+                    text = if (checked) checkedLabel else uncheckedLabel,
+                    fontFamily = fontFamily,
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+                )
+            }
+            Switch(
+                checked = checked,
+                onCheckedChange = { onCheckedChange() },
+                colors = SwitchDefaults.colors(checkedTrackColor = MaterialTheme.colorScheme.primary),
+            )
+        }
+    }
+}
+
+@Composable
+private fun FontPicker(
+    selectedFontName: String,
+    options: List<FontOption>,
+    expanded: Boolean,
+    label: String,
+    borderColor: Color,
+    onExpandedChange: (Boolean) -> Unit,
+    onFontSelected: (String) -> Unit,
+) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp),
+            shape = RoundedCornerShape(20.dp),
+            border = BorderStroke(1.dp, borderColor),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+            onClick = { onExpandedChange(true) },
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(label, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                Text("$selectedFontName  ▾", fontSize = 14.sp)
+            }
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandedChange(false) },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text(option.label, fontFamily = option.fontFamily)
+                            if (option.label == selectedFontName) Text("✓", color = MaterialTheme.colorScheme.primary)
+                        }
+                    },
+                    onClick = {
+                        onFontSelected(option.label)
+                        onExpandedChange(false)
+                    },
+                )
             }
         }
     }
