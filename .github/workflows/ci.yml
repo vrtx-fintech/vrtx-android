@@ -53,9 +53,21 @@ jobs:
       - name: Prepare release keystore
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          test -n "$ANDROID_KEYSTORE_BASE64"
+          test -n "$ANDROID_KEYSTORE_BASE64" \
+            && test -n "$ANDROID_KEYSTORE_PASSWORD" \
+            && test -n "$ANDROID_KEY_ALIAS" \
+            && test -n "$ANDROID_KEY_PASSWORD"
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/android-release.jks"
+          keytool -certreq -alias "$ANDROID_KEY_ALIAS" \
+            -keystore "$RUNNER_TEMP/android-release.jks" \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -keypass "$ANDROID_KEY_PASSWORD" \
+            -file "$RUNNER_TEMP/android-release.csr" >/dev/null
+          rm -f "$RUNNER_TEMP/android-release.csr"
 
       - name: Build signed Sandbox release APK
         env:

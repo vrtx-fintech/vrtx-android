@@ -92,9 +92,21 @@ jobs:
         shell: bash
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          test -n "$ANDROID_KEYSTORE_BASE64"
+          test -n "$ANDROID_KEYSTORE_BASE64" \
+            && test -n "$ANDROID_KEYSTORE_PASSWORD" \
+            && test -n "$ANDROID_KEY_ALIAS" \
+            && test -n "$ANDROID_KEY_PASSWORD"
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/android-release.jks"
+          keytool -certreq -alias "$ANDROID_KEY_ALIAS" \
+            -keystore "$RUNNER_TEMP/android-release.jks" \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -keypass "$ANDROID_KEY_PASSWORD" \
+            -file "$RUNNER_TEMP/android-release.csr" >/dev/null
+          rm -f "$RUNNER_TEMP/android-release.csr"
 
       - name: Build signed Sandbox release APK
         shell: bash
@@ -154,6 +166,38 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git tag "demo-$VERSION"
           git push origin "demo-$VERSION"
+
+      - name: Notify Slack
+        env:
+          WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          NOTES: ${{ inputs.release_notes }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "::warning::SLACK_WEBHOOK_URL is not set; skipping notification."
+            exit 0
+          fi
+          NOTES="${NOTES:0:2900}"
+          TAG_URL="https://github.com/${REPOSITORY}/tree/demo-${VERSION}"
+          PAYLOAD=$(jq -n \
+            --arg title "Vrtx Sandbox app ${VERSION} distributed" \
+            --arg notes "$NOTES" \
+            --arg context "<${TAG_URL}|demo-${VERSION}> · Firebase App Distribution" \
+            '{blocks: [
+              {type: "header", text: {type: "plain_text", text: $title}},
+              {type: "section", text: {type: "mrkdwn", text: $notes}},
+              {type: "context", elements: [{type: "mrkdwn", text: $context}]}
+            ]}')
+          response=$(curl -sS --fail-with-body -X POST \
+            -H 'Content-Type: application/json' \
+            --data "$PAYLOAD" "$WEBHOOK") || {
+              echo "::warning::Slack webhook failed: ${response}"
+              exit 0
+            }
+          if [ "$response" != "ok" ]; then
+            echo "::warning::Slack webhook responded: $response"
+          fi
 
       - name: Clean up credentials
         if: ${{ success() || failure() }}
