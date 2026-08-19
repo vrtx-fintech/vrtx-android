@@ -14,7 +14,7 @@ fun localProperty(key: String, default: String = ""): String =
     (localProperties.getProperty(key) ?: System.getenv(key) ?: default)
 
 val sdkVersion: String =
-    (project.findProperty("sdkVersion") as String?) ?: "0.1.1"
+    (project.findProperty("sdkVersion") as String?) ?: "0.1.6"
 
 val VRTX_CERT_HASH: String = localProperty("VRTX_CERT_HASH")
 
@@ -55,10 +55,6 @@ android {
         create("sandbox") {
             dimension = "environment"
             applicationIdSuffix = ".public.sandbox"
-        }
-        create("staging") {
-            dimension = "environment"
-            applicationIdSuffix = ".public.staging"
         }
     }
 
