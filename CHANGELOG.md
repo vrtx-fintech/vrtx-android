@@ -1,4 +1,6 @@
-## 0.1.5 — 2026-08-19
+## 0.1.6 — 2026-08-19
+
+Fixed security-dialog behavior in Android development builds.## 0.1.5 — 2026-08-19
 
 Improved compatibility with Android development and debug builds## 0.1.4 — 2026-08-19
 
