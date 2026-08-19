@@ -15,6 +15,10 @@ fun localProperty(key: String, default: String = ""): String =
 
 val sdkVersion: String =
     (project.findProperty("sdkVersion") as String?) ?: "0.1.6"
+val appVersionName: String =
+    (project.findProperty("appVersionName") as String?) ?: "1.0.0"
+val appVersionCode: Int =
+    (project.findProperty("appVersionCode") as String?)?.toIntOrNull() ?: 1
 
 val VRTX_CERT_HASH: String = localProperty("VRTX_CERT_HASH")
 val releaseStoreFile: String = localProperty("ANDROID_KEYSTORE_FILE")
@@ -36,8 +40,8 @@ android {
         applicationId = "sa.vrtx.example"
         minSdk = 29
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         buildConfigField("String", "VRTX_CLIENT_ID", "\"${localProperty("VRTX_CLIENT_ID")}\"")
         buildConfigField("String", "VRTX_CLIENT_SECRET", "\"${localProperty("VRTX_CLIENT_SECRET")}\"")
