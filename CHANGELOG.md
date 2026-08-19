@@ -1,4 +1,6 @@
-## 0.1.4 — 2026-08-19
+## 0.1.5 — 2026-08-19
+
+Improved compatibility with Android development and debug builds## 0.1.4 — 2026-08-19
 
 bump again## 0.1.3 — 2026-08-19
 
