@@ -15,8 +15,22 @@ fun localProperty(key: String, default: String = ""): String =
 
 val sdkVersion: String =
     (project.findProperty("sdkVersion") as String?) ?: "0.1.6"
+val appVersionName: String =
+    (project.findProperty("appVersionName") as String?) ?: "1.0.0"
+val appVersionCode: Int =
+    (project.findProperty("appVersionCode") as String?)?.toIntOrNull() ?: 1
 
 val VRTX_CERT_HASH: String = localProperty("VRTX_CERT_HASH")
+val releaseStoreFile: String = localProperty("ANDROID_KEYSTORE_FILE")
+val releaseStorePassword: String = localProperty("ANDROID_KEYSTORE_PASSWORD")
+val releaseKeyAlias: String = localProperty("ANDROID_KEY_ALIAS")
+val releaseKeyPassword: String = localProperty("ANDROID_KEY_PASSWORD")
+val hasReleaseSigningCredentials = listOf(
+    releaseStoreFile,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword,
+).all(String::isNotBlank)
 
 android {
     namespace = "sa.vrtx.example"
@@ -26,8 +40,8 @@ android {
         applicationId = "sa.vrtx.example"
         minSdk = 29
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         buildConfigField("String", "VRTX_CLIENT_ID", "\"${localProperty("VRTX_CLIENT_ID")}\"")
         buildConfigField("String", "VRTX_CLIENT_SECRET", "\"${localProperty("VRTX_CLIENT_SECRET")}\"")
@@ -41,12 +55,23 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
+    signingConfigs {
+        create("release") {
+            if (hasReleaseSigningCredentials) {
+                storeFile = file(releaseStoreFile)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            } else {
+                initWith(getByName("debug"))
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
-            // Sign with the debug keystore for App Distribution test builds.
-            // Replace with a real release signingConfig before shipping.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
