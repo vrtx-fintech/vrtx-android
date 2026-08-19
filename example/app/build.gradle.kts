@@ -51,15 +51,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("release")
-        }
-    }
-
     signingConfigs {
-        getByName("release") {
+        create("release") {
             if (hasReleaseSigningCredentials) {
                 storeFile = file(releaseStoreFile)
                 storePassword = releaseStorePassword
@@ -68,6 +61,13 @@ android {
             } else {
                 initWith(getByName("debug"))
             }
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
