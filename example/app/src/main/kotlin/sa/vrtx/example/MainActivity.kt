@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,8 +13,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -21,6 +25,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -36,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalContext
@@ -47,7 +54,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
-import java.util.UUID
 import sa.vrtx.example.BuildConfig
 import sa.vrtx.public.Vrtx
 import sa.vrtx.public.configuration.Environment
@@ -124,16 +130,14 @@ private val ArabicFontOptions = listOf(
     FontOption("Noto Naskh Arabic", NotoNaskhArabicFontFamily),
 )
 
-private val AtlasTeal = Color(0xFF0E5C56)
-private val AtlasBackground = Color(0xFFF5F1EA)
-private val AtlasOnSurface = Color(0xFF132724)
-private val AtlasMuted = Color(0xFF6B7B78)
-private val AtlasIllustration = Color(0xFFE8E4DC)
-private val AtlasDarkBackground = Color(0xFF10211E)
-private val AtlasDarkSurface = Color(0xFF193330)
-private val AtlasDarkOnSurface = Color(0xFFE9F2EF)
-private val AtlasDarkMuted = Color(0xFFB2C3BD)
-private val AtlasDarkIllustration = Color(0xFF21443E)
+private val Midnight = Color(0xFF07111F)
+private val DeepNavy = Color(0xFF101F38)
+private val Ink = Color(0xFF12233D)
+private val Sky = Color(0xFF5CA9FF)
+private val ElectricBlue = Color(0xFF377DFF)
+private val Aqua = Color(0xFF4DE3D1)
+private val Cloud = Color(0xFFF4F8FF)
+private val Steel = Color(0xFF60708A)
 
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -152,84 +156,113 @@ private fun WelcomeScreen() {
     var selectedFontName by remember { mutableStateOf(LatinFontOptions.first().label) }
     var fontMenuExpanded by remember { mutableStateOf(false) }
     var isLaunching by remember { mutableStateOf(false) }
+    var externalReference by remember { mutableStateOf("") }
     val isArabic = language == Language.Arabic
     val isDark = mode == Mode.DARK
     val colorScheme = if (isDark) {
         darkColorScheme(
-            primary = Color(0xFF56B4A5),
-            onPrimary = Color(0xFF062B26),
-            background = AtlasDarkBackground,
-            onBackground = AtlasDarkOnSurface,
-            surface = AtlasDarkSurface,
-            onSurface = AtlasDarkOnSurface,
+            primary = Sky,
+            onPrimary = Midnight,
+            background = Midnight,
+            onBackground = Cloud,
+            surface = Color.White.copy(alpha = 0.09f),
+            surfaceVariant = Color.White.copy(alpha = 0.06f),
+            onSurface = Cloud,
         )
     } else {
         lightColorScheme(
-            primary = AtlasTeal,
+            primary = ElectricBlue,
             onPrimary = Color.White,
-            background = AtlasBackground,
-            onBackground = AtlasOnSurface,
-            surface = AtlasBackground,
-            onSurface = AtlasOnSurface,
+            background = Cloud,
+            onBackground = Ink,
+            surface = Color.White.copy(alpha = 0.74f),
+            surfaceVariant = Color.White.copy(alpha = 0.54f),
+            onSurface = Ink,
         )
     }
-    val muted = if (isDark) AtlasDarkMuted else AtlasMuted
-    val illustration = if (isDark) AtlasDarkIllustration else AtlasIllustration
+    val muted = if (isDark) Color(0xFFB5C4DB) else Steel
+    val glassBorder = if (isDark) Color.White.copy(alpha = 0.17f) else Color.White.copy(alpha = 0.82f)
+    val pageBrush = if (isDark) {
+        Brush.verticalGradient(listOf(Midnight, DeepNavy, Color(0xFF142B4A)))
+    } else {
+        Brush.verticalGradient(listOf(Color(0xFFEAF3FF), Color(0xFFF7FAFF), Color(0xFFE7F5F6)))
+    }
     val fontOptions = if (isArabic) ArabicFontOptions else LatinFontOptions
     val appFont = fontOptions.firstOrNull { it.label == selectedFontName }?.fontFamily
         ?: fontOptions.first().fontFamily
 
     MaterialTheme(colorScheme = colorScheme) {
         CompositionLocalProvider(LocalLayoutDirection provides if (isArabic) LayoutDirection.Rtl else LayoutDirection.Ltr) {
-            Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Spacer(modifier = Modifier.weight(0.32f))
-            Surface(
-                modifier = Modifier.size(220.dp),
-                shape = RoundedCornerShape(28.dp),
-                color = illustration,
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(pageBrush),
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text("A", fontFamily = appFont, fontSize = 88.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
-                }
-            }
-            Spacer(modifier = Modifier.height(40.dp))
-            Text(
-                text = if (isArabic) "مرحبًا بك في" else "Welcome to",
-                fontFamily = appFont,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.onBackground,
-                textAlign = TextAlign.Center,
-            )
-            Text(
-                text = "Atlas Pay",
-                fontFamily = appFont,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.primary,
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = if (isArabic) "خدمات مصرفية مصممة للأعمال الحديثة" else "Banking built for modern businesses",
-                fontFamily = appFont,
-                fontSize = 16.sp,
-                color = muted,
-                textAlign = TextAlign.Center,
-            )
-            Spacer(modifier = Modifier.weight(0.25f))
-            SettingToggle(
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .imePadding()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 20.dp, vertical = 28.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Surface(
+                        modifier = Modifier.size(84.dp),
+                        shape = RoundedCornerShape(28.dp),
+                        color = colorScheme.surface,
+                        border = BorderStroke(1.dp, glassBorder),
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text("A", fontFamily = appFont, fontSize = 42.sp, fontWeight = FontWeight.Bold, color = Aqua)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Text(
+                        text = if (isArabic) "أهلاً بك في" else "Welcome to",
+                        fontFamily = appFont,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = muted,
+                    )
+                    Text(
+                        text = "Atlas Pay",
+                        fontFamily = appFont,
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onBackground,
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = if (isArabic) "خدمات مصرفية متكاملة، صُممت بثقة." else "Business banking, designed with confidence.",
+                        fontFamily = appFont,
+                        fontSize = 15.sp,
+                        color = muted,
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(modifier = Modifier.height(28.dp))
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(28.dp),
+                        color = colorScheme.surface,
+                        border = BorderStroke(1.dp, glassBorder),
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = if (isArabic) "تفضيلات التجربة" else "Experience preferences",
+                                fontFamily = appFont,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = muted,
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            SettingToggle(
                 label = if (isArabic) "اللغة العربية" else "English language",
                 checked = isArabic,
                 fontFamily = appFont,
                 checkedLabel = "العربية",
                 uncheckedLabel = "English",
-                borderColor = muted.copy(alpha = 0.45f),
+                borderColor = glassBorder,
                 onCheckedChange = {
                     language = if (language == Language.English) Language.Arabic else Language.English
                     selectedFontName = if (language == Language.Arabic) {
@@ -238,37 +271,60 @@ private fun WelcomeScreen() {
                         LatinFontOptions.first().label
                     }
                 },
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            SettingToggle(
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            SettingToggle(
                 label = if (isArabic) "المظهر" else "Appearance",
                 checked = isDark,
                 fontFamily = appFont,
                 checkedLabel = if (isArabic) "داكن" else "Dark",
                 uncheckedLabel = if (isArabic) "فاتح" else "Light",
-                borderColor = muted.copy(alpha = 0.45f),
+                borderColor = glassBorder,
                 onCheckedChange = {
                     mode = if (mode == Mode.LIGHT) Mode.DARK else Mode.LIGHT
                 },
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            FontPicker(
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            FontPicker(
                 selectedFontName = selectedFontName,
                 options = fontOptions,
                 expanded = fontMenuExpanded,
                 label = if (isArabic) "الخط" else "Font",
-                borderColor = muted.copy(alpha = 0.45f),
+                borderColor = glassBorder,
                 onExpandedChange = { fontMenuExpanded = it },
                 onFontSelected = { selectedFontName = it },
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Button(
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                value = externalReference,
+                onValueChange = { externalReference = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text(if (isArabic) "مرجع خارجي (اختياري)" else "External reference (optional)")
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(18.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Aqua,
+                    unfocusedBorderColor = glassBorder,
+                    focusedLabelColor = Aqua,
+                    unfocusedLabelColor = muted,
+                    focusedTextColor = colorScheme.onSurface,
+                    unfocusedTextColor = colorScheme.onSurface,
+                    focusedContainerColor = colorScheme.surface,
+                    unfocusedContainerColor = colorScheme.surface,
+                ),
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Button(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(50.dp),
                 shape = RoundedCornerShape(28.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = AtlasTeal,
+                    containerColor = colorScheme.primary,
                     contentColor = Color.White,
                 ),
                 enabled = !isLaunching,
@@ -281,7 +337,7 @@ private fun WelcomeScreen() {
                         language = language,
                         mode = mode,
                         fontFamily = appFont,
-                        externalReference = UUID.randomUUID().toString(),
+                        externalReference = externalReference,
                         onSuccess = {
                             isLaunching = false
                         },
@@ -293,7 +349,7 @@ private fun WelcomeScreen() {
                         },
                     )
                 },
-            ) {
+                    ) {
                 if (isLaunching) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
@@ -303,9 +359,15 @@ private fun WelcomeScreen() {
                 } else {
                     Text(if (isArabic) "ابدأ الآن" else "Get started", fontFamily = appFont, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
                 }
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = if (isArabic) "بيئة آمنة · وضع الحماية مفعل" else "Secure environment · Protection enabled",
+                        fontFamily = appFont,
+                        fontSize = 12.sp,
+                        color = muted,
+                    )
+                }
             }
         }
     }
@@ -324,10 +386,13 @@ private fun SettingToggle(
     OutlinedButton(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp),
-        shape = RoundedCornerShape(20.dp),
+            .height(50.dp),
+        shape = RoundedCornerShape(16.dp),
         border = BorderStroke(1.dp, borderColor),
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ),
         onClick = onCheckedChange,
     ) {
         Row(
@@ -367,10 +432,13 @@ private fun FontPicker(
         OutlinedButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(20.dp),
+                .height(48.dp),
+            shape = RoundedCornerShape(16.dp),
             border = BorderStroke(1.dp, borderColor),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+            ),
             onClick = { onExpandedChange(true) },
         ) {
             Row(

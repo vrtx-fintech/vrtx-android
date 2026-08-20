@@ -135,6 +135,16 @@ jobs:
             -PappVersionName="$APP_VERSION" -PappVersionCode="$APP_VERSION_CODE" \
             --no-daemon --build-cache
 
+      - name: Upload APK artifact
+        id: apk-artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: apk-sandbox-native-${{ needs.prepare.outputs.version }}
+          path: example/app/build/outputs/apk/sandbox/release/app-sandbox-release.apk
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
       - name: Install Firebase CLI
         shell: bash
         run: npm install -g firebase-tools@15.12.0
@@ -166,57 +176,70 @@ jobs:
             --release-notes-file "${NOTES_FILE}" \
             --testers-file "${TESTERS_FILE}"
 
-      - name: Tag demo release
+      - name: Upload preview to Appetize.io
+        id: appetize
+        shell: bash
         env:
-          VERSION: ${{ needs.prepare.outputs.version }}
+          APPETIZE_TOKEN: ${{ secrets.APPETIZE_API_TOKEN }}
         run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git tag "demo-$VERSION"
-          git push origin "demo-$VERSION"
+          set -euo pipefail
+          if [ -z "${APPETIZE_TOKEN}" ]; then
+            echo "::error::APPETIZE_API_TOKEN is not set."
+            exit 1
+          fi
+          response=$(curl -sS --fail-with-body \
+            -H "X-API-KEY: ${APPETIZE_TOKEN}" \
+            --form "file=@example/app/build/outputs/apk/sandbox/release/app-sandbox-release.apk" \
+            --form "platform=android" \
+            "https://api.appetize.io/v1/apps")
+          public_url=$(jq -r '.publicURL // empty' <<<"${response}")
+          if [ -z "${public_url}" ]; then
+            echo "::error::Appetize upload succeeded but no publicURL returned. Response:"
+            echo "${response}"
+            exit 1
+          fi
+          echo "url=${public_url}" >> "${GITHUB_OUTPUT}"
+          echo "Appetize preview: ${public_url}"
 
       - name: Notify Slack
+        shell: bash
         env:
           WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
           VERSION: ${{ needs.prepare.outputs.version }}
           NOTES: ${{ inputs.release_notes }}
-          REPOSITORY: ${{ github.repository }}
+          CLIENT_ID: ${{ secrets.VRTX_CLIENT_ID }}
+          APPETIZE_URL: ${{ steps.appetize.outputs.url }}
+          APK_ARTIFACT_URL: ${{ steps.apk-artifact.outputs.artifact-url }}
         run: |
+          set -euo pipefail
           if [ -z "$WEBHOOK" ]; then
-            echo "::warning::SLACK_WEBHOOK_URL is not set; skipping notification."
+            echo "::warning::SLACK_WEBHOOK_URL is not set; skipping release announcement."
             exit 0
           fi
-          NOTES="${NOTES:0:2900}"
-          TAG_URL="https://github.com/${REPOSITORY}/tree/demo-${VERSION}"
-          PAYLOAD=$(jq -n \
-            --arg fallback "Vrtx Sandbox app ${VERSION} distributed" \
-            --arg title "🚀 Sandbox app v${VERSION} is ready" \
-            --arg version "${VERSION}" \
-            --arg notes "$NOTES" \
-            --arg tag "<${TAG_URL}|🏷️ demo-${VERSION}>" \
-            '{text: $fallback, blocks: [
-              {type: "header", text: {type: "plain_text", text: $title, emoji: true}},
-              {type: "section", fields: [
-                {type: "mrkdwn", text: ("*Version*\nv" + $version)},
-                {type: "mrkdwn", text: "*Environment*\n🟡 Sandbox"},
-                {type: "mrkdwn", text: "*Delivery*\n📲 Firebase App Distribution"},
-                {type: "mrkdwn", text: "*Status*\n✅ Available to testers"}
-              ]},
-              {type: "divider"},
-              {type: "section", text: {type: "mrkdwn", text: ("*What’s new*\n" + $notes)}},
-              {type: "context", elements: [
-                {type: "mrkdwn", text: $tag},
-                {type: "mrkdwn", text: "🔐 Signed release"}
-              ]}
-            ]}')
+          title="Public Android Demo App ${VERSION} Available (sandbox · ${CLIENT_ID})"
+          context="Environment: sandbox · Client ID: ${CLIENT_ID} · <${APPETIZE_URL}|Appetize preview>"
+          if [ -n "${APK_ARTIFACT_URL}" ]; then
+            context="${context} · <${APK_ARTIFACT_URL}|APK (expires in 7d)>"
+          fi
+          payload=$(jq -n \
+            --arg title "${title}" \
+            --arg notes "${NOTES}" \
+            --arg context "${context}" \
+            '{
+              blocks: [
+                {type: "header", text: {type: "plain_text", text: $title}},
+                {type: "section", text: {type: "mrkdwn", text: $notes}},
+                {type: "context", elements: [{type: "mrkdwn", text: $context}]}
+              ]
+            }')
           response=$(curl -sS --fail-with-body -X POST \
             -H 'Content-Type: application/json' \
-            --data "$PAYLOAD" "$WEBHOOK") || {
-              echo "::warning::Slack webhook failed: ${response}"
+            --data "${payload}" "${WEBHOOK}") || {
+              echo "::warning::Slack webhook curl failed: ${response}"
               exit 0
             }
-          if [ "$response" != "ok" ]; then
-            echo "::warning::Slack webhook responded: $response"
+          if [ "${response}" != "ok" ]; then
+            echo "::warning::Slack webhook responded: ${response}"
           fi
 
       - name: Clean up credentials
