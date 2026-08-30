@@ -14,7 +14,7 @@ fun localProperty(key: String, default: String = ""): String =
     (localProperties.getProperty(key) ?: System.getenv(key) ?: default)
 
 val sdkVersion: String =
-    (project.findProperty("sdkVersion") as String?) ?: "0.1.6"
+    (project.findProperty("sdkVersion") as String?) ?: "0.1.7"
 val appVersionName: String =
     (project.findProperty("appVersionName") as String?) ?: "1.0.0"
 val appVersionCode: Int =
