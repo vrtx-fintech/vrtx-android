@@ -31,7 +31,7 @@ dependencyResolutionManagement {
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("sa.vrtx.sa:vrtx-android:0.1.6")
+    implementation("sa.vrtx.sa:vrtx-android:0.1.7")
 }
 ```
 
@@ -59,13 +59,13 @@ For example:
 
 ```
 Attribute application@allowBackup value=(true) from AndroidManifest.xml
-is also present at [sa.vrtx.sa:vrtx-android:0.1.6] AndroidManifest.xml value=(false).
+is also present at [sa.vrtx.sa:vrtx-android:0.1.7] AndroidManifest.xml value=(false).
 
 Attribute application@fullBackupContent value=(@xml/backup_rules) from AndroidManifest.xml
-is also present at [sa.vrtx.sa:vrtx-android:0.1.6] AndroidManifest.xml value=(false).
+is also present at [sa.vrtx.sa:vrtx-android:0.1.7] AndroidManifest.xml value=(false).
 
 Attribute application@usesCleartextTraffic value=(true) from AndroidManifest.xml
-is also present at [sa.vrtx.sa:vrtx-android:0.1.6] AndroidManifest.xml value=(false).
+is also present at [sa.vrtx.sa:vrtx-android:0.1.7] AndroidManifest.xml value=(false).
 ```
 
 Update the application attributes to match the SDK requirements. Do not override
@@ -73,7 +73,8 @@ these values with `tools:replace`.
 
 ```xml
 <!-- app/src/main/AndroidManifest.xml -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:allowBackup="false"
