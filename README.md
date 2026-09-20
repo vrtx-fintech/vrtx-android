@@ -4,13 +4,13 @@ The official Android SDK for **Vrtx** — onboarding, wallet, and card flows for
 
 ## Requirements
 
-| Tooling              | Minimum |
-| -------------------- | ------- |
-| Android `minSdk`     | 29      |
-| Android `compileSdk` | 37      |
-| Android Gradle Plugin| 9.1     |
-| Kotlin               | 2.4.10    |
-| JVM target           | 17      |
+| Tooling               | Minimum |
+| --------------------- | ------- |
+| Android `minSdk`      | 29      |
+| Android `compileSdk`  | 37      |
+| Android Gradle Plugin | 9.1     |
+| Kotlin                | 2.4.10  |
+| JVM target            | 17      |
 
 ## 1. Add the SDK
 
@@ -31,7 +31,7 @@ dependencyResolutionManagement {
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("sa.vrtx.sa:vrtx-android:0.1.7")
+    implementation("sa.vrtx.sa:vrtx-android:0.1.8")
 }
 ```
 
@@ -59,13 +59,13 @@ For example:
 
 ```
 Attribute application@allowBackup value=(true) from AndroidManifest.xml
-is also present at [sa.vrtx.sa:vrtx-android:0.1.7] AndroidManifest.xml value=(false).
+is also present at [sa.vrtx.sa:vrtx-android:0.1.8] AndroidManifest.xml value=(false).
 
 Attribute application@fullBackupContent value=(@xml/backup_rules) from AndroidManifest.xml
-is also present at [sa.vrtx.sa:vrtx-android:0.1.7] AndroidManifest.xml value=(false).
+is also present at [sa.vrtx.sa:vrtx-android:0.1.8] AndroidManifest.xml value=(false).
 
 Attribute application@usesCleartextTraffic value=(true) from AndroidManifest.xml
-is also present at [sa.vrtx.sa:vrtx-android:0.1.7] AndroidManifest.xml value=(false).
+is also present at [sa.vrtx.sa:vrtx-android:0.1.8] AndroidManifest.xml value=(false).
 ```
 
 Update the application attributes to match the SDK requirements. Do not override
@@ -99,7 +99,7 @@ Open your terminal and run the following `keytool` command:
 keytool -list -v -keystore path/to/your/keystore.jks -alias your_alias
 ```
 
-*(For the standard debug keystore, the path is `~/.android/debug.keystore`, the alias is `androiddebugkey`, and the password is `android`)*.
+_(For the standard debug keystore, the path is `~/.android/debug.keystore`, the alias is `androiddebugkey`, and the password is `android`)_.
 
 Enter your keystore password when prompted. Look for the `SHA256:` fingerprint in the output. It will look like this:
 
@@ -115,7 +115,7 @@ Run this command (replace the hex string with your own from the previous step):
 echo -n "4D:5E:6F:7A:8B:9C:0D:1E:2F:3A:4B:5C:6D:7E:8F:9A:0B:1C:2D:3E:4F:5A:6B:7C:8D:9E:0F:1A:2B:3C:4D:5E" | tr -d ':' | xxd -r -p | base64
 ```
 
-*(If `xxd` is not available, you can use Python: `python3 -c "import base64; print(base64.b64encode(bytes.fromhex('4D5E6F...')).decode())"`)*
+_(If `xxd` is not available, you can use Python: `python3 -c "import base64; print(base64.b64encode(bytes.fromhex('4D5E6F...')).decode())"`)_
 
 ### Add it to Gradle
 
@@ -128,10 +128,26 @@ event. Store credentials outside source control—for example, inject them throu
 your build system or use `local.properties` for local development.
 
 ```kotlin
+import android.net.Uri
 import sa.vrtx.public.Vrtx
 import sa.vrtx.public.configuration.Environment
 import sa.vrtx.public.configuration.Language
 import sa.vrtx.public.configuration.Mode
+import sa.vrtx.public.configuration.theme.ThemeOptions
+import sa.vrtx.public.configuration.theme.VrtxColors
+import sa.vrtx.public.configuration.theme.VrtxRadius
+import sa.vrtx.public.configuration.theme.VrtxSizing
+import sa.vrtx.public.configuration.theme.VrtxSpacing
+
+val customThemeOptions = ThemeOptions(
+    cardImage = Uri.parse("https://example.com/card.png"),
+    brandLogo = Uri.parse("https://example.com/logo.png"),
+    brandName = "Atlas Pay",
+    colors = VrtxColors(),
+    spacing = VrtxSpacing(),
+    radius = VrtxRadius(),
+    sizing = VrtxSizing(),
+)
 
 Vrtx.setup(
     clientId = "VRTX_CLIENT_ID",
@@ -139,10 +155,12 @@ Vrtx.setup(
     environment = Environment.Sandbox,
     language = Language.English,
     mode = Mode.LIGHT,
+    theme = customThemeOptions,
     fontFamily = FontFamily.Default,
     externalReference = "YOUR_EXTERNAL_REFERENCE",
     onSuccess = { /* SDK UI launched */ },
     onError = { error -> /* surface to the user */ },
+    onExit = { /* SDK UI closed */ },
 )
 ```
 
@@ -154,16 +172,51 @@ suspending function. `onSuccess` runs once the SDK UI has launched; use
 
 `Vrtx.setup` accepts these public configuration types:
 
-| Parameter | Type | Values |
-| --------- | ---- | ------ |
-| `environment` | `Environment` | `Environment.Sandbox`, `Environment.Production` |
-| `language` | `Language` | `Language.English`, `Language.Arabic` |
-| `mode` | `Mode` | `Mode.LIGHT`, `Mode.DARK` |
-| `externalReference` | `String?` | Optional app-defined reference attached to the SDK session |
+| Parameter           | Type            | Values                                                     |
+| ------------------- | --------------- | ---------------------------------------------------------- |
+| `environment`       | `Environment`   | `Environment.Sandbox`, `Environment.Production`            |
+| `language`          | `Language`      | `Language.English`, `Language.Arabic`                      |
+| `mode`              | `Mode`          | `Mode.LIGHT`, `Mode.DARK`                                  |
+| `theme`             | `ThemeOptions?` | Optional SDK theme and design-token overrides              |
+| `externalReference` | `String?`       | Optional app-defined reference attached to the SDK session |
 
 For appearance, pass `mode` and a Compose `fontFamily` built from a font already embedded in your app, such as Inter.
 
-Omit `externalReference` when no external reference is needed.
+### ThemeOptions reference
+
+| Parameter               | Type           | Values                                                                                     |
+| ----------------------- | -------------- | ------------------------------------------------------------------------------------------ |
+| `cardImage`             | `Uri?`         | Optional card image URI                                                                    |
+| `brandLogo`             | `Uri?`         | Optional brand logo URI                                                                    |
+| `brandName`             | `String?`      | Optional brand name                                                                        |
+| `colors`                | `VrtxColors?`  | `allBrands`, `labels`, `fills`, `backgrounds`, `backgroundsGradient`, `accents`            |
+| `spacing`               | `VrtxSpacing?` | `x0`, `xxs`, `xs`, `sm`, `md`, `ml`, `lg`, `xl`, `xxl`, `xxxl`                             |
+| `radius`                | `VrtxRadius?`  | `x0`, `xxs`, `xs`, `s`, `sm`, `md`, `ml`, `lg`, `xl`, `xxl`, `xxxl`, `big`, `full`, `huge` |
+| `sizing`                | `VrtxSizing?`  | `xxs`, `xs`, `sm`, `md`, `lg`, `xl`, `xxl`, `xxxl`                                         |
+| `defaultThemeOptions()` | `ThemeOptions` | `Vrtx.defaultThemeOptions()` with the SDK's default tokens                                 |
+
+`Vrtx.defaultThemeOptions()` returns a complete theme with the SDK's default
+colors, spacing, radius, and sizing tokens. Consumers may use it as a base and
+copy or replace any `ThemeOptions` property, or construct `ThemeOptions`
+directly. Every nested token is nullable and falls back to the SDK default when
+omitted.
+
+`ThemeOptions` is the complete consumer-facing theme object. Its top-level
+properties are `cardImage`, `brandLogo`, `brandName`, `colors`, `spacing`,
+`radius`, and `sizing`. `colors` contains `allBrands`, `labels`, `fills`
+(including `vibrant`), `backgrounds`, `backgroundsGradient`, and `accents`.
+The other groups expose the SDK's spacing, corner-radius, and component-sizing
+tokens. Every field is nullable, so consumers can provide only the values they
+own or provide the complete object graph.
+
+The `customThemeOptions` object above is passed as `theme` in `Vrtx.setup`.
+The nested color and token objects are also public (`VrtxColors`,
+`VrtxSpacing`, `VrtxRadius`, and `VrtxSizing`) when an app needs to replace
+the complete design system.
+
+`onExit` runs when the user leaves the SDK UI. Omit `externalReference` when no
+external reference is needed. `theme` and `onExit` are optional; the
+values above show the 0.1.8 defaults explicitly.
 
 ## Support
 

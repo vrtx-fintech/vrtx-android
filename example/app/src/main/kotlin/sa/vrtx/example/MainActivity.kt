@@ -1,5 +1,6 @@
 package sa.vrtx.example
 
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -59,6 +60,11 @@ import sa.vrtx.public.Vrtx
 import sa.vrtx.public.configuration.Environment
 import sa.vrtx.public.configuration.Language
 import sa.vrtx.public.configuration.Mode
+import sa.vrtx.public.configuration.theme.ThemeOptions
+import sa.vrtx.public.configuration.theme.VrtxColors
+import sa.vrtx.public.configuration.theme.VrtxRadius
+import sa.vrtx.public.configuration.theme.VrtxSizing
+import sa.vrtx.public.configuration.theme.VrtxSpacing
 
 private val vrtxEnvironment: Environment =
     Environment.entries.find { it.name.equals(BuildConfig.VRTX_ENVIRONMENT, ignoreCase = true) }
@@ -138,6 +144,95 @@ private val ElectricBlue = Color(0xFF377DFF)
 private val Aqua = Color(0xFF4DE3D1)
 private val Cloud = Color(0xFFF4F8FF)
 private val Steel = Color(0xFF60708A)
+
+private val ExampleThemeOptions = ThemeOptions(
+    cardImage = Uri.parse("https://placehold.co/640x400/png"),
+    brandLogo = Uri.parse("https://placehold.co/160x64/png"),
+    brandName = "Atlas Pay",
+    colors = VrtxColors(
+        allBrands = VrtxColors.AllBrands(
+            primary = ElectricBlue,
+            buttonLabel = Color.White,
+        ),
+        labels = VrtxColors.Labels(
+            primary = Ink,
+            secondary = Steel,
+            tertiary = Color(0xFF8B9AB2),
+            quaternary = Color(0xFFB8C4D6),
+        ),
+        fills = VrtxColors.Fills(
+            primary = Color(0xFFEAF3FF),
+            secondary = Color(0xFFDCEAFF),
+            tertiary = Color(0xFFC5D9F5),
+            quaternary = Color(0xFFADC8EC),
+            vibrant = VrtxColors.Fills.Vibrant(
+                secondary = Aqua,
+            ),
+        ),
+        backgrounds = VrtxColors.Backgrounds(
+            primary = Cloud,
+            secondary = Color(0xFFF7FAFF),
+            tertiary = Color(0xFFE7F5F6),
+            primaryElevated = Color.White,
+            secondaryElevated = Color(0xFFF1F6FC),
+            tertiaryElevated = Color(0xFFE6EEF8),
+        ),
+        backgroundsGradient = VrtxColors.BackgroundsGradients(
+            wb01 = Color(0xFFEAF3FF),
+            wb02 = Color(0xFFE7F5F6),
+        ),
+        accents = VrtxColors.Accents(
+            red = Color(0xFFE05252),
+            redBg = Color(0xFFFFE7E7),
+            green = Color(0xFF2E9B67),
+            greenBg = Color(0xFFE1F5EA),
+            orange = Color(0xFFE58A2B),
+            indigo = Color(0xFF5B5BD6),
+            teal = Aqua,
+            pink = Color(0xFFD65B9B),
+            cyan = Color(0xFF2DAAC7),
+            purple = Color(0xFF8A5BD6),
+        ),
+    ),
+    spacing = VrtxSpacing(
+        x0 = 0.dp,
+        xxs = 2.dp,
+        xs = 4.dp,
+        sm = 8.dp,
+        md = 12.dp,
+        ml = 16.dp,
+        lg = 20.dp,
+        xl = 24.dp,
+        xxl = 32.dp,
+        xxxl = 40.dp,
+    ),
+    radius = VrtxRadius(
+        x0 = 0.dp,
+        xxs = 2.dp,
+        xs = 4.dp,
+        s = 6.dp,
+        sm = 8.dp,
+        md = 12.dp,
+        ml = 16.dp,
+        lg = 20.dp,
+        xl = 24.dp,
+        xxl = 28.dp,
+        xxxl = 32.dp,
+        big = 40.dp,
+        full = 999.dp,
+        huge = 64.dp,
+    ),
+    sizing = VrtxSizing(
+        xxs = 2.dp,
+        xs = 4.dp,
+        sm = 8.dp,
+        md = 16.dp,
+        lg = 24.dp,
+        xl = 32.dp,
+        xxl = 48.dp,
+        xxxl = 64.dp,
+    ),
+)
 
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -336,6 +431,7 @@ private fun WelcomeScreen() {
                         environment = vrtxEnvironment,
                         language = language,
                         mode = mode,
+                        theme = ExampleThemeOptions,
                         fontFamily = appFont,
                         externalReference = externalReference,
                         onSuccess = {
@@ -346,6 +442,9 @@ private fun WelcomeScreen() {
                             Toast
                                 .makeText(context, "Setup failed: ${err.message}", Toast.LENGTH_LONG)
                                 .show()
+                        },
+                        onExit = {
+                            isLaunching = false
                         },
                     )
                 },
