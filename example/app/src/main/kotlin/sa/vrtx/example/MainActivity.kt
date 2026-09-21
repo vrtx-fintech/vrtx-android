@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import sa.vrtx.example.BuildConfig
 import sa.vrtx.public.Vrtx
+import sa.vrtx.public.configuration.DesignOption
 import sa.vrtx.public.configuration.Environment
 import sa.vrtx.public.configuration.Language
 import sa.vrtx.public.configuration.Mode
@@ -430,6 +431,7 @@ private fun WelcomeScreen() {
                         clientSecret = BuildConfig.VRTX_CLIENT_SECRET,
                         environment = vrtxEnvironment,
                         language = language,
+                        designOption = DesignOption.OptionC,
                         mode = mode,
                         theme = ExampleThemeOptions,
                         fontFamily = appFont,

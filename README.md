@@ -130,6 +130,7 @@ your build system or use `local.properties` for local development.
 ```kotlin
 import android.net.Uri
 import sa.vrtx.public.Vrtx
+import sa.vrtx.public.configuration.DesignOption
 import sa.vrtx.public.configuration.Environment
 import sa.vrtx.public.configuration.Language
 import sa.vrtx.public.configuration.Mode
@@ -154,6 +155,7 @@ Vrtx.setup(
     clientSecret = "VRTX_CLIENT_SECRET",
     environment = Environment.Sandbox,
     language = Language.English,
+    designOption = DesignOption.OptionC,
     mode = Mode.LIGHT,
     theme = customThemeOptions,
     fontFamily = FontFamily.Default,
@@ -176,6 +178,7 @@ suspending function. `onSuccess` runs once the SDK UI has launched; use
 | ------------------- | --------------- | ---------------------------------------------------------- |
 | `environment`       | `Environment`   | `Environment.Sandbox`, `Environment.Production`            |
 | `language`          | `Language`      | `Language.English`, `Language.Arabic`                      |
+| `designOption`      | `DesignOption`  | `DesignOption.OptionA`, `OptionB`, `OptionC`               |
 | `mode`              | `Mode`          | `Mode.LIGHT`, `Mode.DARK`                                  |
 | `theme`             | `ThemeOptions?` | Optional SDK theme and design-token overrides              |
 | `externalReference` | `String?`       | Optional app-defined reference attached to the SDK session |
