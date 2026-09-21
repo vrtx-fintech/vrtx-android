@@ -178,7 +178,7 @@ suspending function. `onSuccess` runs once the SDK UI has launched; use
 | ------------------- | --------------- | ---------------------------------------------------------- |
 | `environment`       | `Environment`   | `Environment.Sandbox`, `Environment.Production`            |
 | `language`          | `Language`      | `Language.English`, `Language.Arabic`                      |
-| `designOption`      | `DesignOption`  | `DesignOption.OptionA`, `OptionB`, `OptionC`               |
+| `designOption`      | `DesignOption`  | `DesignOption.OptionA`, `DesignOption.OptionB`, `DesignOption.OptionC` |
 | `mode`              | `Mode`          | `Mode.LIGHT`, `Mode.DARK`                                  |
 | `theme`             | `ThemeOptions?` | Optional SDK theme and design-token overrides              |
 | `externalReference` | `String?`       | Optional app-defined reference attached to the SDK session |
