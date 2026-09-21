@@ -129,7 +129,10 @@ your build system or use `local.properties` for local development.
 
 ```kotlin
 import android.net.Uri
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import sa.vrtx.public.Vrtx
+import sa.vrtx.public.configuration.DesignOption
 import sa.vrtx.public.configuration.Environment
 import sa.vrtx.public.configuration.Language
 import sa.vrtx.public.configuration.Mode
@@ -143,10 +146,89 @@ val customThemeOptions = ThemeOptions(
     cardImage = Uri.parse("https://example.com/card.png"),
     brandLogo = Uri.parse("https://example.com/logo.png"),
     brandName = "Atlas Pay",
-    colors = VrtxColors(),
-    spacing = VrtxSpacing(),
-    radius = VrtxRadius(),
-    sizing = VrtxSizing(),
+    colors = VrtxColors(
+        allBrands = VrtxColors.AllBrands(
+            primary = Color(0xFF377DFF),
+            buttonLabel = Color(0xFFFFFFFF),
+        ),
+        labels = VrtxColors.Labels(
+            primary = Color(0xFF12233D),
+            secondary = Color(0xFF60708A),
+            tertiary = Color(0xFF8B9AB2),
+            quaternary = Color(0xFFB8C4D6),
+        ),
+        fills = VrtxColors.Fills(
+            primary = Color(0xFFEAF3FF),
+            secondary = Color(0xFFDCEAFF),
+            tertiary = Color(0xFFC5D9F5),
+            quaternary = Color(0xFFADC8EC),
+            vibrant = VrtxColors.Fills.Vibrant(
+                secondary = Color(0xFF4DE3D1),
+            ),
+        ),
+        backgrounds = VrtxColors.Backgrounds(
+            primary = Color(0xFFF4F8FF),
+            secondary = Color(0xFFF7FAFF),
+            tertiary = Color(0xFFE7F5F6),
+            primaryElevated = Color(0xFFFFFFFF),
+            secondaryElevated = Color(0xFFF1F6FC),
+            tertiaryElevated = Color(0xFFE6EEF8),
+        ),
+        backgroundsGradient = VrtxColors.BackgroundsGradients(
+            wb01 = Color(0xFFEAF3FF),
+            wb02 = Color(0xFFE7F5F6),
+        ),
+        accents = VrtxColors.Accents(
+            red = Color(0xFFE05252),
+            redBg = Color(0xFFFFE7E7),
+            green = Color(0xFF2E9B67),
+            greenBg = Color(0xFFE1F5EA),
+            orange = Color(0xFFE58A2B),
+            indigo = Color(0xFF5B5BD6),
+            teal = Color(0xFF4DE3D1),
+            pink = Color(0xFFD65B9B),
+            cyan = Color(0xFF2DAAC7),
+            purple = Color(0xFF8A5BD6),
+        ),
+    ),
+    spacing = VrtxSpacing(
+        x0 = 0.dp,
+        xxs = 2.dp,
+        xs = 4.dp,
+        sm = 8.dp,
+        md = 12.dp,
+        ml = 16.dp,
+        lg = 20.dp,
+        xl = 24.dp,
+        xxl = 32.dp,
+        xxxl = 40.dp,
+    ),
+    radius = VrtxRadius(
+        x0 = 0.dp,
+        xxs = 2.dp,
+        xs = 4.dp,
+        s = 6.dp,
+        sm = 8.dp,
+        md = 12.dp,
+        ml = 16.dp,
+        lg = 20.dp,
+        xl = 24.dp,
+        xxl = 28.dp,
+        xxxl = 32.dp,
+        big = 40.dp,
+        full = 999.dp,
+        huge = 64.dp,
+    ),
+    sizing = VrtxSizing(
+        xxs = 2.dp,
+        xs = 4.dp,
+        sm = 8.dp,
+        md = 16.dp,
+        lg = 24.dp,
+        xl = 32.dp,
+        xxl = 48.dp,
+        xxxl = 64.dp,
+    ),
 )
 
 Vrtx.setup(
@@ -154,6 +236,7 @@ Vrtx.setup(
     clientSecret = "VRTX_CLIENT_SECRET",
     environment = Environment.Sandbox,
     language = Language.English,
+    designOption = DesignOption.OptionC,
     mode = Mode.LIGHT,
     theme = customThemeOptions,
     fontFamily = FontFamily.Default,
@@ -176,6 +259,7 @@ suspending function. `onSuccess` runs once the SDK UI has launched; use
 | ------------------- | --------------- | ---------------------------------------------------------- |
 | `environment`       | `Environment`   | `Environment.Sandbox`, `Environment.Production`            |
 | `language`          | `Language`      | `Language.English`, `Language.Arabic`                      |
+| `designOption`      | `DesignOption`  | `DesignOption.OptionA`, `DesignOption.OptionB`, `DesignOption.OptionC` |
 | `mode`              | `Mode`          | `Mode.LIGHT`, `Mode.DARK`                                  |
 | `theme`             | `ThemeOptions?` | Optional SDK theme and design-token overrides              |
 | `externalReference` | `String?`       | Optional app-defined reference attached to the SDK session |
@@ -194,6 +278,17 @@ For appearance, pass `mode` and a Compose `fontFamily` built from a font already
 | `radius`                | `VrtxRadius?`  | `x0`, `xxs`, `xs`, `s`, `sm`, `md`, `ml`, `lg`, `xl`, `xxl`, `xxxl`, `big`, `full`, `huge` |
 | `sizing`                | `VrtxSizing?`  | `xxs`, `xs`, `sm`, `md`, `lg`, `xl`, `xxl`, `xxxl`                                         |
 | `defaultThemeOptions()` | `ThemeOptions` | `Vrtx.defaultThemeOptions()` with the SDK's default tokens                                 |
+
+`VrtxColors` contains these nested keys:
+
+| **GroupTypeKeys** | **Type** | **Keys** |
+| ----------------- | -------- | ------- |
+| `colors.allBrands` | `VrtxColors.AllBrands` | `primary`, `buttonLabel` |
+| `colors.labels` | `VrtxColors.Labels` | `primary`, `secondary`, `tertiary`, `quaternary` |
+| `colors.fills` | `VrtxColors.Fills` | `primary`, `secondary`, `tertiary`, `quaternary`, `vibrant.secondary` |
+| `colors.backgrounds` | `VrtxColors.Backgrounds` | `primary`, `secondary`, `tertiary`, `primaryElevated`, `secondaryElevated`, `tertiaryElevated` |
+| `colors.backgroundsGradient` | `VrtxColors.BackgroundsGradients` | `wb01`, `wb02` |
+| `colors.accents` | `VrtxColors.Accents` | `red`, `redBg`, `green`, `greenBg`, `orange`, `indigo`, `teal`, `pink`, `cyan`, `purple` |
 
 `Vrtx.defaultThemeOptions()` returns a complete theme with the SDK's default
 colors, spacing, radius, and sizing tokens. Consumers may use it as a base and
