@@ -64,7 +64,6 @@ import sa.vrtx.public.configuration.Mode
 import sa.vrtx.public.configuration.theme.ThemeOptions
 import sa.vrtx.public.configuration.theme.VrtxColors
 import sa.vrtx.public.configuration.theme.VrtxRadius
-import sa.vrtx.public.configuration.theme.VrtxSizing
 import sa.vrtx.public.configuration.theme.VrtxSpacing
 
 private val vrtxEnvironment: Environment =
@@ -173,10 +172,6 @@ private val ExampleThemeOptions = ThemeOptions(
         backgrounds = VrtxColors.Backgrounds(
             primary = Cloud,
             secondary = Color(0xFFF7FAFF),
-            tertiary = Color(0xFFE7F5F6),
-            primaryElevated = Color.White,
-            secondaryElevated = Color(0xFFF1F6FC),
-            tertiaryElevated = Color(0xFFE6EEF8),
         ),
         backgroundsGradient = VrtxColors.BackgroundsGradients(
             wb01 = Color(0xFFEAF3FF),
@@ -184,54 +179,23 @@ private val ExampleThemeOptions = ThemeOptions(
         ),
         accents = VrtxColors.Accents(
             red = Color(0xFFE05252),
-            redBg = Color(0xFFFFE7E7),
             green = Color(0xFF2E9B67),
             greenBg = Color(0xFFE1F5EA),
-            orange = Color(0xFFE58A2B),
-            indigo = Color(0xFF5B5BD6),
-            teal = Aqua,
-            pink = Color(0xFFD65B9B),
-            cyan = Color(0xFF2DAAC7),
-            purple = Color(0xFF8A5BD6),
         ),
     ),
     spacing = VrtxSpacing(
-        x0 = 0.dp,
-        xxs = 2.dp,
-        xs = 4.dp,
         sm = 8.dp,
         md = 12.dp,
         ml = 16.dp,
         lg = 20.dp,
-        xl = 24.dp,
-        xxl = 32.dp,
-        xxxl = 40.dp,
     ),
     radius = VrtxRadius(
-        x0 = 0.dp,
-        xxs = 2.dp,
-        xs = 4.dp,
         s = 6.dp,
         sm = 8.dp,
         md = 12.dp,
-        ml = 16.dp,
         lg = 20.dp,
-        xl = 24.dp,
-        xxl = 28.dp,
-        xxxl = 32.dp,
-        big = 40.dp,
         full = 999.dp,
         huge = 64.dp,
-    ),
-    sizing = VrtxSizing(
-        xxs = 2.dp,
-        xs = 4.dp,
-        sm = 8.dp,
-        md = 16.dp,
-        lg = 24.dp,
-        xl = 32.dp,
-        xxl = 48.dp,
-        xxxl = 64.dp,
     ),
 )
 
