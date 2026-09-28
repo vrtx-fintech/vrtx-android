@@ -31,7 +31,7 @@ dependencyResolutionManagement {
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("sa.vrtx.sa:vrtx-android:0.1.8")
+    implementation("sa.vrtx.sa:vrtx-android:0.1.9")
 }
 ```
 
@@ -59,13 +59,13 @@ For example:
 
 ```
 Attribute application@allowBackup value=(true) from AndroidManifest.xml
-is also present at [sa.vrtx.sa:vrtx-android:0.1.8] AndroidManifest.xml value=(false).
+is also present at [sa.vrtx.sa:vrtx-android:0.1.9] AndroidManifest.xml value=(false).
 
 Attribute application@fullBackupContent value=(@xml/backup_rules) from AndroidManifest.xml
-is also present at [sa.vrtx.sa:vrtx-android:0.1.8] AndroidManifest.xml value=(false).
+is also present at [sa.vrtx.sa:vrtx-android:0.1.9] AndroidManifest.xml value=(false).
 
 Attribute application@usesCleartextTraffic value=(true) from AndroidManifest.xml
-is also present at [sa.vrtx.sa:vrtx-android:0.1.8] AndroidManifest.xml value=(false).
+is also present at [sa.vrtx.sa:vrtx-android:0.1.9] AndroidManifest.xml value=(false).
 ```
 
 Update the application attributes to match the SDK requirements. Do not override
@@ -139,7 +139,6 @@ import sa.vrtx.public.configuration.Mode
 import sa.vrtx.public.configuration.theme.ThemeOptions
 import sa.vrtx.public.configuration.theme.VrtxColors
 import sa.vrtx.public.configuration.theme.VrtxRadius
-import sa.vrtx.public.configuration.theme.VrtxSizing
 import sa.vrtx.public.configuration.theme.VrtxSpacing
 
 val customThemeOptions = ThemeOptions(
@@ -169,10 +168,6 @@ val customThemeOptions = ThemeOptions(
         backgrounds = VrtxColors.Backgrounds(
             primary = Color(0xFFF4F8FF),
             secondary = Color(0xFFF7FAFF),
-            tertiary = Color(0xFFE7F5F6),
-            primaryElevated = Color(0xFFFFFFFF),
-            secondaryElevated = Color(0xFFF1F6FC),
-            tertiaryElevated = Color(0xFFE6EEF8),
         ),
         backgroundsGradient = VrtxColors.BackgroundsGradients(
             wb01 = Color(0xFFEAF3FF),
@@ -180,54 +175,23 @@ val customThemeOptions = ThemeOptions(
         ),
         accents = VrtxColors.Accents(
             red = Color(0xFFE05252),
-            redBg = Color(0xFFFFE7E7),
             green = Color(0xFF2E9B67),
             greenBg = Color(0xFFE1F5EA),
-            orange = Color(0xFFE58A2B),
-            indigo = Color(0xFF5B5BD6),
-            teal = Color(0xFF4DE3D1),
-            pink = Color(0xFFD65B9B),
-            cyan = Color(0xFF2DAAC7),
-            purple = Color(0xFF8A5BD6),
         ),
     ),
     spacing = VrtxSpacing(
-        x0 = 0.dp,
-        xxs = 2.dp,
-        xs = 4.dp,
         sm = 8.dp,
         md = 12.dp,
         ml = 16.dp,
         lg = 20.dp,
-        xl = 24.dp,
-        xxl = 32.dp,
-        xxxl = 40.dp,
     ),
     radius = VrtxRadius(
-        x0 = 0.dp,
-        xxs = 2.dp,
-        xs = 4.dp,
         s = 6.dp,
         sm = 8.dp,
         md = 12.dp,
-        ml = 16.dp,
         lg = 20.dp,
-        xl = 24.dp,
-        xxl = 28.dp,
-        xxxl = 32.dp,
-        big = 40.dp,
         full = 999.dp,
         huge = 64.dp,
-    ),
-    sizing = VrtxSizing(
-        xxs = 2.dp,
-        xs = 4.dp,
-        sm = 8.dp,
-        md = 16.dp,
-        lg = 24.dp,
-        xl = 32.dp,
-        xxl = 48.dp,
-        xxxl = 64.dp,
     ),
 )
 
@@ -255,63 +219,62 @@ suspending function. `onSuccess` runs once the SDK UI has launched; use
 
 `Vrtx.setup` accepts these public configuration types:
 
-| Parameter           | Type            | Values                                                     |
-| ------------------- | --------------- | ---------------------------------------------------------- |
-| `environment`       | `Environment`   | `Environment.Sandbox`, `Environment.Production`            |
-| `language`          | `Language`      | `Language.English`, `Language.Arabic`                      |
+| Parameter           | Type            | Values                                                                 |
+| ------------------- | --------------- | ---------------------------------------------------------------------- |
+| `environment`       | `Environment`   | `Environment.Sandbox`, `Environment.Production`                        |
+| `language`          | `Language`      | `Language.English`, `Language.Arabic`                                  |
 | `designOption`      | `DesignOption`  | `DesignOption.OptionA`, `DesignOption.OptionB`, `DesignOption.OptionC` |
-| `mode`              | `Mode`          | `Mode.LIGHT`, `Mode.DARK`                                  |
-| `theme`             | `ThemeOptions?` | Optional SDK theme and design-token overrides              |
-| `externalReference` | `String?`       | Optional app-defined reference attached to the SDK session |
+| `mode`              | `Mode`          | `Mode.LIGHT`, `Mode.DARK`                                              |
+| `theme`             | `ThemeOptions?` | Optional SDK theme and design-token overrides                          |
+| `externalReference` | `String?`       | Optional app-defined reference attached to the SDK session             |
 
 For appearance, pass `mode` and a Compose `fontFamily` built from a font already embedded in your app, such as Inter.
 
 ### ThemeOptions reference
 
-| Parameter               | Type           | Values                                                                                     |
-| ----------------------- | -------------- | ------------------------------------------------------------------------------------------ |
-| `cardImage`             | `Uri?`         | Optional card image URI                                                                    |
-| `brandLogo`             | `Uri?`         | Optional brand logo URI                                                                    |
-| `brandName`             | `String?`      | Optional brand name                                                                        |
-| `colors`                | `VrtxColors?`  | `allBrands`, `labels`, `fills`, `backgrounds`, `backgroundsGradient`, `accents`            |
-| `spacing`               | `VrtxSpacing?` | `x0`, `xxs`, `xs`, `sm`, `md`, `ml`, `lg`, `xl`, `xxl`, `xxxl`                             |
-| `radius`                | `VrtxRadius?`  | `x0`, `xxs`, `xs`, `s`, `sm`, `md`, `ml`, `lg`, `xl`, `xxl`, `xxxl`, `big`, `full`, `huge` |
-| `sizing`                | `VrtxSizing?`  | `xxs`, `xs`, `sm`, `md`, `lg`, `xl`, `xxl`, `xxxl`                                         |
-| `defaultThemeOptions()` | `ThemeOptions` | `Vrtx.defaultThemeOptions()` with the SDK's default tokens                                 |
+| Parameter               | Type           | Values                                                                          |
+| ----------------------- | -------------- | ------------------------------------------------------------------------------- |
+| `cardImage`             | `Uri?`         | Optional card image URI                                                         |
+| `brandLogo`             | `Uri?`         | Optional brand logo URI                                                         |
+| `brandName`             | `String?`      | Optional brand name                                                             |
+| `colors`                | `VrtxColors?`  | `allBrands`, `labels`, `fills`, `backgrounds`, `backgroundsGradient`, `accents` |
+| `spacing`               | `VrtxSpacing?` | `x0`, `xxs`, `xs`, `sm`, `md`, `ml`, `lg`                                       |
+| `radius`                | `VrtxRadius?`  | `s`, `sm`, `md`, `lg`, `full`, `huge`                                           |
+| `defaultThemeOptions()` | `ThemeOptions` | `Vrtx.defaultThemeOptions()` with the SDK's default tokens                      |
 
 `VrtxColors` contains these nested keys:
 
-| **GroupTypeKeys** | **Type** | **Keys** |
-| ----------------- | -------- | ------- |
-| `colors.allBrands` | `VrtxColors.AllBrands` | `primary`, `buttonLabel` |
-| `colors.labels` | `VrtxColors.Labels` | `primary`, `secondary`, `tertiary`, `quaternary` |
-| `colors.fills` | `VrtxColors.Fills` | `primary`, `secondary`, `tertiary`, `quaternary`, `vibrant.secondary` |
-| `colors.backgrounds` | `VrtxColors.Backgrounds` | `primary`, `secondary`, `tertiary`, `primaryElevated`, `secondaryElevated`, `tertiaryElevated` |
-| `colors.backgroundsGradient` | `VrtxColors.BackgroundsGradients` | `wb01`, `wb02` |
-| `colors.accents` | `VrtxColors.Accents` | `red`, `redBg`, `green`, `greenBg`, `orange`, `indigo`, `teal`, `pink`, `cyan`, `purple` |
+| **GroupTypeKeys**            | **Type**                          | **Keys**                                                              |
+| ---------------------------- | --------------------------------- | --------------------------------------------------------------------- |
+| `colors.allBrands`           | `VrtxColors.AllBrands`            | `primary`, `buttonLabel`                                              |
+| `colors.labels`              | `VrtxColors.Labels`               | `primary`, `secondary`, `tertiary`, `quaternary`                      |
+| `colors.fills`               | `VrtxColors.Fills`                | `primary`, `secondary`, `tertiary`, `quaternary`, `vibrant.secondary` |
+| `colors.backgrounds`         | `VrtxColors.Backgrounds`          | `primary`, `secondary`                                                |
+| `colors.backgroundsGradient` | `VrtxColors.BackgroundsGradients` | `wb01`, `wb02`                                                        |
+| `colors.accents`             | `VrtxColors.Accents`              | `red`, `green`, `greenBg`                                             |
 
 `Vrtx.defaultThemeOptions()` returns a complete theme with the SDK's default
-colors, spacing, radius, and sizing tokens. Consumers may use it as a base and
+colors, spacing, and radius tokens. Consumers may use it as a base and
 copy or replace any `ThemeOptions` property, or construct `ThemeOptions`
 directly. Every nested token is nullable and falls back to the SDK default when
 omitted.
 
 `ThemeOptions` is the complete consumer-facing theme object. Its top-level
-properties are `cardImage`, `brandLogo`, `brandName`, `colors`, `spacing`,
-`radius`, and `sizing`. `colors` contains `allBrands`, `labels`, `fills`
+properties are `cardImage`, `brandLogo`, `brandName`, `colors`, `spacing`, and
+`radius`. `colors` contains `allBrands`, `labels`, `fills`
 (including `vibrant`), `backgrounds`, `backgroundsGradient`, and `accents`.
-The other groups expose the SDK's spacing, corner-radius, and component-sizing
+The other groups expose the SDK's spacing and corner-radius
 tokens. Every field is nullable, so consumers can provide only the values they
 own or provide the complete object graph.
 
 The `customThemeOptions` object above is passed as `theme` in `Vrtx.setup`.
 The nested color and token objects are also public (`VrtxColors`,
-`VrtxSpacing`, `VrtxRadius`, and `VrtxSizing`) when an app needs to replace
+`VrtxSpacing`, and `VrtxRadius`) when an app needs to replace
 the complete design system.
 
 `onExit` runs when the user leaves the SDK UI. Omit `externalReference` when no
 external reference is needed. `theme` and `onExit` are optional; the
-values above show the 0.1.8 defaults explicitly.
+values above show the 0.1.9 defaults explicitly.
 
 ## Support
 
