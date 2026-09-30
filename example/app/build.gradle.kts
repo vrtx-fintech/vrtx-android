@@ -33,11 +33,11 @@ val hasReleaseSigningCredentials = listOf(
 ).all(String::isNotBlank)
 
 android {
-    namespace = "com.atlaspay.app"
+    namespace = "sa.vrtx.example"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.atlaspay.app"
+        applicationId = "sa.vrtx.example.public.sandbox"
         minSdk = 29
         targetSdk = 37
         versionCode = appVersionCode
