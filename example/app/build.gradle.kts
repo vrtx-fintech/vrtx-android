@@ -83,6 +83,10 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             signingConfig = signingConfigs.getByName("release")
+            ndk {
+                // Appetize uses x86/x86_64 emulators; release is intentionally ARM-only.
+                abiFilters.clear()
+            }
         }
     }
 
