@@ -14,13 +14,13 @@ fun localProperty(key: String, default: String = ""): String =
     (localProperties.getProperty(key) ?: System.getenv(key) ?: default)
 
 val sdkVersion: String =
-    (project.findProperty("sdkVersion") as String?) ?: "0.1.9"
+    (project.findProperty("sdkVersion") as String?) ?: "0.1.13"
 val appVersionName: String =
     (project.findProperty("appVersionName") as String?) ?: "1.0.0"
 val appVersionCode: Int =
     (project.findProperty("appVersionCode") as String?)?.toIntOrNull() ?: 1
 
-val VRTX_CERT_HASH: String = localProperty("VRTX_CERT_HASH")
+val vrtxCertHash: String = localProperty("VRTX_CERT_HASH")
 val releaseStoreFile: String = localProperty("ANDROID_KEYSTORE_FILE")
 val releaseStorePassword: String = localProperty("ANDROID_KEYSTORE_PASSWORD")
 val releaseKeyAlias: String = localProperty("ANDROID_KEY_ALIAS")
@@ -33,11 +33,11 @@ val hasReleaseSigningCredentials = listOf(
 ).all(String::isNotBlank)
 
 android {
-    namespace = "sa.vrtx.example"
+    namespace = "com.atlaspay.app"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "sa.vrtx.example"
+        applicationId = "com.atlaspay.app"
         minSdk = 29
         targetSdk = 37
         versionCode = appVersionCode
@@ -47,7 +47,7 @@ android {
         buildConfigField("String", "VRTX_CLIENT_SECRET", "\"${localProperty("VRTX_CLIENT_SECRET")}\"")
         buildConfigField("String", "VRTX_ENVIRONMENT", "\"${localProperty("VRTX_ENVIRONMENT", "Sandbox")}\"")
         manifestPlaceholders["vrtxPackageName"] = applicationId ?: ""
-        manifestPlaceholders["vrtxCertHash"] = VRTX_CERT_HASH
+        manifestPlaceholders["vrtxCertHash"] = vrtxCertHash
     }
 
     compileOptions {
@@ -83,7 +83,6 @@ android {
     productFlavors {
         create("sandbox") {
             dimension = "environment"
-            applicationIdSuffix = ".public.sandbox"
         }
     }
 
