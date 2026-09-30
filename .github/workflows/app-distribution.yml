@@ -219,6 +219,24 @@ jobs:
           echo "url=${public_url}" >> "${GITHUB_OUTPUT}"
           echo "Appetize preview: ${public_url}"
 
+      - name: Tag distributed version
+        shell: bash
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          set -euo pipefail
+          tag="demo-${VERSION}"
+
+          if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
+            echo "::error::Version tag ${tag} already exists. Refusing to publish a duplicate version."
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${tag}" -m "Release demo ${VERSION}"
+          git push origin "${tag}"
+
       - name: Notify Slack
         shell: bash
         env:
