@@ -21,7 +21,6 @@ Add Maven Central, the Talsec freeRASP repository, and JitPack to your repositor
 dependencyResolutionManagement {
     repositories {
         google()
-        maven("https://europe-west3-maven.pkg.dev/talsec-artifact-repository/freerasp")
         maven("https://jitpack.io")
         mavenCentral()
     }
