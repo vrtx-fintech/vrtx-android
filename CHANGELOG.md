@@ -1,4 +1,6 @@
-## 0.1.12 — 2026-09-30
+## 0.1.13 — 2026-09-30
+
+SDK release - 2026-09-30 -  allow sandbox unlocked devices## 0.1.12 — 2026-09-30
 
 SDK release - 2026-09-30 -  sandbox obfuscation warnings## 0.1.11 — 2026-09-29
 
