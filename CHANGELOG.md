@@ -1,4 +1,6 @@
-## 0.1.11 — 2026-09-29
+## 0.1.12 — 2026-09-30
+
+SDK release - 2026-09-30 -  sandbox obfuscation warnings## 0.1.11 — 2026-09-29
 
 Release SDK - 2026-09-29 - expose security threat details## 0.1.10 — 2026-09-29
 
