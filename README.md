@@ -347,6 +347,7 @@ The `customThemeOptions` object above is passed as `theme` in `Vrtx.setup`.
 The nested color and token objects are also public (`VrtxColors`,
 `VrtxSpacing`, and `VrtxRadius`) when an app needs to replace the complete design system.
 
+## Support
 
 For credentials, license keys, and integration help, contact your Vrtx account manager or [contact@vrtx.sa](mailto:contact@vrtx.sa).
 
