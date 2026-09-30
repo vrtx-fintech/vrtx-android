@@ -212,7 +212,7 @@ Review the permissions included in your final application and reflect applicable
 
 ## Support
 
-For credentials, production access, licensing, or integration assistance, contact your Vrtx account manager or [contact@vrtx.sa](mailto:contact@vrtx.sa).
+For credentials, license keys, and integration help, contact your Vrtx account manager or [contact@vrtx.sa](mailto:contact@vrtx.sa).
 
 ## License
 
