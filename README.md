@@ -437,7 +437,7 @@ hardware before diagnosing it.
 ## Build the example
 
 `example/` is a standalone Gradle build that consumes the published SDK from
-Maven Central. It uses `com.atlaspay.app` as its application ID.
+Maven Central.
 
 ```bash
 cd example

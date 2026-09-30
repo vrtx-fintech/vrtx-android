@@ -1,4 +1,4 @@
-package com.atlaspay.app
+package sa.vrtx.example
 
 import android.os.Bundle
 import android.widget.Toast
