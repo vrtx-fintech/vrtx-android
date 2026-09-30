@@ -4,22 +4,25 @@ The official Android SDK for **Vrtx** — onboarding, wallet, and card flows for
 
 ## Requirements
 
-- Android `minSdk` 29 or higher
-- Android `compileSdk` 37 or higher
-- Kotlin with JVM target 17 or higher
-- AndroidX and Jetpack Compose
+| Tooling               | Minimum |
+| --------------------- | ------- |
+| Android `minSdk`      | 29      |
+| Android `compileSdk`  | 37      |
+| Android Gradle Plugin | 9.1     |
+| Kotlin                | 2.4.10  |
+| JVM target            | 17      |
 
-## Installation
+## 1. Add the SDK
 
-Add the Vrtx repository and SDK dependency to your project:
+Add Maven Central, the Talsec freeRASP repository, and JitPack to your repositories, then declare the dependency.
 
 ```kotlin
 // settings.gradle.kts
 dependencyResolutionManagement {
     repositories {
         google()
-        mavenCentral()
         maven("https://jitpack.io")
+        mavenCentral()
     }
 }
 ```
@@ -31,63 +34,101 @@ dependencies {
 }
 ```
 
-## Configure your application
-
-Add your application ID and certificate hash to the app module:
+The SDK requires `compileSdk` 37 or higher. Configure the required manifest
+placeholders in your app module, using your final application ID and the
+Base64-encoded SHA-256 certificate hash described below.
 
 ```kotlin
 // app/build.gradle.kts
 android {
     defaultConfig {
         manifestPlaceholders["vrtxPackageName"] = applicationId ?: ""
-        manifestPlaceholders["vrtxCertHash"] = "YOUR_CERTIFICATE_HASH"
+        manifestPlaceholders["vrtxCertHash"] = "YOUR_CERT_HASH"
     }
 }
 ```
 
-`vrtxPackageName` must match the final application ID, including any flavor or build-type suffix.
+## 2. Align manifest security settings
 
-For secure communication and data protection, configure your application manifest as follows:
+The SDK enforces strict security defaults: backups and cleartext HTTP traffic
+are disabled. If your app currently enables either, the manifest merger will
+report a conflict.
+
+For example:
+
+```
+Attribute application@allowBackup value=(true) from AndroidManifest.xml
+is also present at [sa.vrtx.sa:vrtx-android:0.1.9] AndroidManifest.xml value=(false).
+
+Attribute application@fullBackupContent value=(@xml/backup_rules) from AndroidManifest.xml
+is also present at [sa.vrtx.sa:vrtx-android:0.1.9] AndroidManifest.xml value=(false).
+
+Attribute application@usesCleartextTraffic value=(true) from AndroidManifest.xml
+is also present at [sa.vrtx.sa:vrtx-android:0.1.9] AndroidManifest.xml value=(false).
+```
+
+Update the application attributes to match the SDK requirements. Do not override
+these values with `tools:replace`.
 
 ```xml
 <!-- app/src/main/AndroidManifest.xml -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
     <application
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:usesCleartextTraffic="false"
-        android:dataExtractionRules="@xml/data_extraction_rules">
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        tools:targetApi="31">
         ...
     </application>
 </manifest>
 ```
 
-## Generate the certificate hash
+## 3. Generate your certificate hash
 
-Vrtx uses the SHA-256 fingerprint of your signing certificate, encoded as Base64, to verify the application.
+The SDK uses the certificate hash to verify app integrity and prevent repackaging. freeRASP requires the **SHA-256** hash of your signing certificate, converted to **Base64** format.
 
-Run the following command with your signing keystore:
+### Get the SHA-256 fingerprint
+
+Open your terminal and run the following `keytool` command:
 
 ```bash
 keytool -list -v -keystore path/to/your/keystore.jks -alias your_alias
 ```
 
-Copy the `SHA256` fingerprint, remove the colons, and convert it to Base64:
+_(For the standard debug keystore, the path is `~/.android/debug.keystore`, the alias is `androiddebugkey`, and the password is `android`)_.
 
-```bash
-echo -n "YOUR_SHA256_FINGERPRINT" | tr -d ':' | xxd -r -p | base64
+Enter your keystore password when prompted. Look for the `SHA256:` fingerprint in the output. It will look like this:
+
+```text
+SHA256: 4D:5E:6F:7A:8B:9C:0D:1E:2F:3A:4B:5C:6D:7E:8F:9A:0B:1C:2D:3E:4F:5A:6B:7C:8D:9E:0F:1A:2B:3C:4D:5E
 ```
 
-Add the resulting value to `vrtxCertHash`. If your application uses separate debug and release signing certificates, provide both values as a comma-separated list.
+### Convert the hex string to Base64
 
-## Start a Vrtx session
+Run this command (replace the hex string with your own from the previous step):
 
-Call `Vrtx.setup` from an activity or another user-initiated UI event:
+```bash
+echo -n "4D:5E:6F:7A:8B:9C:0D:1E:2F:3A:4B:5C:6D:7E:8F:9A:0B:1C:2D:3E:4F:5A:6B:7C:8D:9E:0F:1A:2B:3C:4D:5E" | tr -d ':' | xxd -r -p | base64
+```
+
+_(If `xxd` is not available, you can use Python: `python3 -c "import base64; print(base64.b64encode(bytes.fromhex('4D5E6F...')).decode())"`)_
+
+### Add it to Gradle
+
+Copy the resulting Base64 string (e.g., `TV5veoucDR4KOktcbX6Pm...==`) and paste it into your `vrtxCertHash` manifest placeholder. You can provide multiple hashes (e.g., debug and release) separated by commas.
+
+## 4. Launch the SDK
+
+Import the public API and call `Vrtx.setup` from an activity or another UI
+event. Store credentials outside source control—for example, inject them through
+your build system or use `local.properties` for local development.
 
 ```kotlin
 import android.net.Uri
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import sa.vrtx.public.Vrtx
 import sa.vrtx.public.configuration.DesignOption
@@ -102,11 +143,11 @@ import sa.vrtx.public.configuration.theme.VrtxSpacing
 val customThemeOptions = ThemeOptions(
     cardImage = Uri.parse("https://example.com/card.png"),
     brandLogo = Uri.parse("https://example.com/logo.png"),
-    brandName = "Your Brand",
+    brandName = "Atlas Pay",
     colors = VrtxColors(
         allBrands = VrtxColors.AllBrands(
             primary = Color(0xFF377DFF),
-            buttonLabel = Color.White,
+            buttonLabel = Color(0xFFFFFFFF),
         ),
         labels = VrtxColors.Labels(
             primary = Color(0xFF12233D),
@@ -120,7 +161,7 @@ val customThemeOptions = ThemeOptions(
             tertiary = Color(0xFFC5D9F5),
             quaternary = Color(0xFFADC8EC),
             vibrant = VrtxColors.Fills.Vibrant(
-                secondary = Color(0xFF5CA9FF),
+                secondary = Color(0xFF4DE3D1),
             ),
         ),
         backgrounds = VrtxColors.Backgrounds(
@@ -129,7 +170,7 @@ val customThemeOptions = ThemeOptions(
         ),
         backgroundsGradient = VrtxColors.BackgroundsGradients(
             wb01 = Color(0xFFEAF3FF),
-            wb02 = Color(0xFFDCEBFF),
+            wb02 = Color(0xFFE7F5F6),
         ),
         accents = VrtxColors.Accents(
             red = Color(0xFFE05252),
@@ -154,8 +195,8 @@ val customThemeOptions = ThemeOptions(
 )
 
 Vrtx.setup(
-    clientId = "YOUR_CLIENT_ID",
-    clientSecret = "YOUR_CLIENT_SECRET",
+    clientId = "VRTX_CLIENT_ID",
+    clientSecret = "VRTX_CLIENT_SECRET",
     environment = Environment.Sandbox,
     language = Language.English,
     designOption = DesignOption.OptionC,
@@ -163,52 +204,76 @@ Vrtx.setup(
     theme = customThemeOptions,
     fontFamily = FontFamily.Default,
     externalReference = "YOUR_EXTERNAL_REFERENCE",
-    onSuccess = {
-        // The Vrtx experience is ready.
-    },
-    onError = { error ->
-        // Handle the error in your application.
-    },
-    onExit = {
-        // The user has left the Vrtx experience.
-    },
+    onSuccess = { /* SDK UI launched */ },
+    onError = { error -> /* surface to the user */ },
+    onExit = { /* SDK UI closed */ },
 )
 ```
 
-Keep production credentials in your secure build or secrets-management system. Do not commit them to source control.
-
-Only one Vrtx session can be active at a time. Disable or guard the entry point while a session is launching or open.
+`Vrtx.setup` authenticates with Vrtx and launches the SDK activity. It is not a
+suspending function. `onSuccess` runs once the SDK UI has launched; use
+`onError` to show an integration-safe error state to the user.
 
 ## Configuration reference
 
-| Parameter | Required | Description |
-| --- | --- | --- |
-| `clientId` | Yes | Client ID provided by Vrtx. |
-| `clientSecret` | Yes | Client secret provided by Vrtx. |
-| `environment` | Yes | `Sandbox`, `Staging`, or `Production`. |
-| `fontFamily` | Yes | A font available in your application. |
-| `language` | No | `English` or `Arabic`. Defaults to `English`. |
-| `designOption` | No | `OptionA`, `OptionB`, or `OptionC`. Defaults to `OptionC`. |
-| `mode` | No | `LIGHT` or `DARK`. Defaults to `LIGHT`. |
-| `theme` | No | Optional branding and design-token customization. |
-| `externalReference` | No | An application-defined reference for the session. |
-| `onSuccess` | No | Called when the Vrtx experience is ready. |
-| `onError` | No | Called when the session cannot be started or completed. |
-| `onExit` | No | Called when the user leaves the Vrtx experience. |
+`Vrtx.setup` accepts these public configuration types:
 
-Use `Environment.Sandbox` during integration, `Environment.Staging` for pre-release validation, and `Environment.Production` for live users.
+| Parameter           | Type            | Values                                                                 |
+| ------------------- | --------------- | ---------------------------------------------------------------------- |
+| `environment`       | `Environment`   | `Environment.Sandbox`, `Environment.Production`                        |
+| `language`          | `Language`      | `Language.English`, `Language.Arabic`                                  |
+| `designOption`      | `DesignOption`  | `DesignOption.OptionA`, `DesignOption.OptionB`, `DesignOption.OptionC` |
+| `mode`              | `Mode`          | `Mode.LIGHT`, `Mode.DARK`                                              |
+| `theme`             | `ThemeOptions?` | Optional SDK theme and design-token overrides                          |
+| `externalReference` | `String?`       | Optional app-defined reference attached to the SDK session             |
 
-## Branding and theming
+For appearance, pass `mode` and a Compose `fontFamily` built from a font already embedded in your app, such as Inter.
 
-The `ThemeOptions` example above shows the complete branding configuration. You can customize the logo, card image, brand name, colors, spacing, and corner radius.
+### ThemeOptions reference
 
-All theme properties are optional. Unspecified properties use the Vrtx defaults. Use `Vrtx.defaultThemeOptions()` as a starting point when you need the complete default theme.
+| Parameter               | Type           | Values                                                                          |
+| ----------------------- | -------------- | ------------------------------------------------------------------------------- |
+| `cardImage`             | `Uri?`         | Optional card image URI                                                         |
+| `brandLogo`             | `Uri?`         | Optional brand logo URI                                                         |
+| `brandName`             | `String?`      | Optional brand name                                                             |
+| `colors`                | `VrtxColors?`  | `allBrands`, `labels`, `fills`, `backgrounds`, `backgroundsGradient`, `accents` |
+| `spacing`               | `VrtxSpacing?` | `x0`, `xxs`, `xs`, `sm`, `md`, `ml`, `lg`                                       |
+| `radius`                | `VrtxRadius?`  | `s`, `sm`, `md`, `lg`, `full`, `huge`                                           |
+| `defaultThemeOptions()` | `ThemeOptions` | `Vrtx.defaultThemeOptions()` with the SDK's default tokens                      |
 
-## Privacy and security
+`VrtxColors` contains these nested keys:
 
-The SDK uses device, network, biometric, and application-integrity signals to help protect the Vrtx experience. NFC may be used when your integration supports card reading.
+| **GroupTypeKeys**            | **Type**                          | **Keys**                                                              |
+| ---------------------------- | --------------------------------- | --------------------------------------------------------------------- |
+| `colors.allBrands`           | `VrtxColors.AllBrands`            | `primary`, `buttonLabel`                                              |
+| `colors.labels`              | `VrtxColors.Labels`               | `primary`, `secondary`, `tertiary`, `quaternary`                      |
+| `colors.fills`               | `VrtxColors.Fills`                | `primary`, `secondary`, `tertiary`, `quaternary`, `vibrant.secondary` |
+| `colors.backgrounds`         | `VrtxColors.Backgrounds`          | `primary`, `secondary`                                                |
+| `colors.backgroundsGradient` | `VrtxColors.BackgroundsGradients` | `wb01`, `wb02`                                                        |
+| `colors.accents`             | `VrtxColors.Accents`              | `red`, `green`, `greenBg`                                             |
 
-Review the permissions included in your final application and reflect applicable data processing in your privacy policy and Google Play Data Safety declaration. Your organization is responsible for ensuring that its disclosures and user notices are accurate for the features it enables.
+`Vrtx.defaultThemeOptions()` returns a complete theme with the SDK's default
+colors, spacing, and radius tokens. Consumers may use it as a base and
+copy or replace any `ThemeOptions` property, or construct `ThemeOptions`
+directly. Every nested token is nullable and falls back to the SDK default when
+omitted.
+
+`ThemeOptions` is the complete consumer-facing theme object. Its top-level
+properties are `cardImage`, `brandLogo`, `brandName`, `colors`, `spacing`, and
+`radius`. `colors` contains `allBrands`, `labels`, `fills`
+(including `vibrant`), `backgrounds`, `backgroundsGradient`, and `accents`.
+The other groups expose the SDK's spacing and corner-radius
+tokens. Every field is nullable, so consumers can provide only the values they
+own or provide the complete object graph.
+
+The `customThemeOptions` object above is passed as `theme` in `Vrtx.setup`.
+The nested color and token objects are also public (`VrtxColors`,
+`VrtxSpacing`, and `VrtxRadius`) when an app needs to replace
+the complete design system.
+
+`onExit` runs when the user leaves the SDK UI. Omit `externalReference` when no
+external reference is needed. `theme` and `onExit` are optional; the
+values above show the 0.1.9 defaults explicitly.
 
 ## Support
 
