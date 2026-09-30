@@ -77,6 +77,13 @@ android {
                 abiFilters += listOf("arm64-v8a", "armeabi-v7a")
             }
         }
+        create("preview") {
+            initWith(getByName("release"))
+            isDebuggable = true
+            isMinifyEnabled = false
+            isShrinkResources = false
+            signingConfig = signingConfigs.getByName("release")
+        }
     }
 
     flavorDimensions += "environment"

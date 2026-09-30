@@ -86,6 +86,7 @@ import sa.vrtx.public.configuration.theme.ThemeOptions
 import sa.vrtx.public.configuration.theme.VrtxColors
 import sa.vrtx.public.configuration.theme.VrtxRadius
 import sa.vrtx.public.configuration.theme.VrtxSpacing
+import sa.vrtx.public.error.SecurityVerificationError
 
 private val vrtxEnvironment: Environment =
     Environment.entries.find { it.name.equals(BuildConfig.VRTX_ENVIRONMENT, ignoreCase = true) }
@@ -153,10 +154,9 @@ private val DeepNavy = Color(0xFF101F38)
 private val Ink = Color(0xFF12233D)
 private val Sky = Color(0xFF5CA9FF)
 private val ElectricBlue = Color(0xFF377DFF)
-private val Aqua = Color(0xFF4DE3D1)
 private val Cloud = Color(0xFFF4F8FF)
 private val Steel = Color(0xFF60708A)
-private val ExampleThemeOptions = ThemeOptions(
+private val BlueThemeOptions = ThemeOptions(
     cardImage = "https://placehold.co/640x400/png".toUri(),
     brandLogo = "https://placehold.co/160x64/png".toUri(),
     brandName = "Atlas Pay",
@@ -177,7 +177,7 @@ private val ExampleThemeOptions = ThemeOptions(
             tertiary = Color(0xFFC5D9F5),
             quaternary = Color(0xFFADC8EC),
             vibrant = VrtxColors.Fills.Vibrant(
-                secondary = Aqua,
+                secondary = Sky,
             ),
         ),
         backgrounds = VrtxColors.Backgrounds(
@@ -186,7 +186,7 @@ private val ExampleThemeOptions = ThemeOptions(
         ),
         backgroundsGradient = VrtxColors.BackgroundsGradients(
             wb01 = Color(0xFFEAF3FF),
-            wb02 = Color(0xFFE7F5F6),
+            wb02 = Color(0xFFDCEBFF),
         ),
         accents = VrtxColors.Accents(
             red = Color(0xFFE05252),
@@ -399,16 +399,20 @@ private fun HomeScreen(
                     language = pay.language,
                     designOption = DesignOption.OptionC,
                     mode = pay.mode,
-                    theme = ExampleThemeOptions,
+                    theme = BlueThemeOptions,
                     fontFamily = font,
                     externalReference = pay.externalReference,
                     onSuccess = {
                         pay.launching = false
                     },
-                    onError = { err ->
+                    onError = { error ->
                         pay.launching = false
+                        val threatCode = (error as? SecurityVerificationError)?.threatCode
+                        val errorMessage = error.message?.let { message ->
+                            threatCode?.let { code -> "$message ($code)" } ?: message
+                        } ?: "Unknown error"
                         Toast
-                            .makeText(context, "Setup failed: ${err.message}", Toast.LENGTH_LONG)
+                            .makeText(context, "Setup failed: $errorMessage", Toast.LENGTH_LONG)
                             .show()
                     },
                     onExit = {
@@ -547,7 +551,7 @@ private fun BalanceCard(
                         Icon(
                             imageVector = Icons.Filled.CheckCircle,
                             contentDescription = null,
-                            tint = Aqua,
+                            tint = Sky,
                             modifier = Modifier.size(13.dp),
                         )
                         Spacer(modifier = Modifier.width(5.dp))
@@ -600,7 +604,7 @@ private fun BalanceStat(
             fontFamily = font,
             fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold,
-            color = if (credit) Aqua else Color.White,
+            color = if (credit) Sky else Color.White,
         )
     }
 }
@@ -675,7 +679,7 @@ private fun TransactionRow(
     font: FontFamily,
     muted: Color,
 ) {
-    val tint = if (txn.credit) Aqua else ElectricBlue
+    val tint = if (txn.credit) Sky else ElectricBlue
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -726,7 +730,7 @@ private fun TransactionRow(
             fontFamily = font,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
-            color = if (txn.credit) Aqua else MaterialTheme.colorScheme.onSurface,
+            color = if (txn.credit) Sky else MaterialTheme.colorScheme.onSurface,
         )
     }
 }
@@ -836,9 +840,9 @@ private fun SettingsScreen(
             singleLine = true,
             shape = RoundedCornerShape(18.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Aqua,
+                focusedBorderColor = Sky,
                 unfocusedBorderColor = glassBorder,
-                focusedLabelColor = Aqua,
+                focusedLabelColor = Sky,
                 unfocusedLabelColor = muted,
                 focusedTextColor = scheme.onSurface,
                 unfocusedTextColor = scheme.onSurface,

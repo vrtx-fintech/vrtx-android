@@ -135,6 +135,24 @@ jobs:
             -PappVersionName="$APP_VERSION" -PappVersionCode="$APP_VERSION_CODE" \
             --no-daemon --build-cache
 
+      - name: Build signed debuggable Sandbox preview APK for Appetize
+        shell: bash
+        env:
+          VRTX_CLIENT_ID: ${{ secrets.VRTX_CLIENT_ID }}
+          VRTX_CLIENT_SECRET: ${{ secrets.VRTX_CLIENT_SECRET }}
+          VRTX_CERT_HASH: ${{ secrets.VRTX_CERT_HASH }}
+          VRTX_ENVIRONMENT: Sandbox
+          ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/android-release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          APP_VERSION: ${{ needs.prepare.outputs.version }}
+          APP_VERSION_CODE: ${{ needs.prepare.outputs.version_code }}
+        run: |
+          ./gradlew -p example :app:assembleSandboxPreview \
+            -PappVersionName="$APP_VERSION" -PappVersionCode="$APP_VERSION_CODE" \
+            --no-daemon --build-cache
+
       - name: Upload APK artifact
         id: apk-artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -189,7 +207,7 @@ jobs:
           fi
           response=$(curl -sS --fail-with-body \
             -H "X-API-KEY: ${APPETIZE_TOKEN}" \
-            --form "file=@example/app/build/outputs/apk/sandbox/release/app-sandbox-release.apk" \
+            --form "file=@example/app/build/outputs/apk/sandbox/preview/app-sandbox-preview.apk" \
             --form "platform=android" \
             "https://api.appetize.io/v1/apps")
           public_url=$(jq -r '.publicURL // empty' <<<"${response}")
