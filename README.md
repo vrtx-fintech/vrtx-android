@@ -1,4 +1,4 @@
-# Vrtx Android SDK
+# vrtx-android
 
 The official Android SDK for integrating Vrtx onboarding, wallet, and card experiences into your Android application.
 
