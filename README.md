@@ -235,7 +235,7 @@ val customThemeOptions = ThemeOptions(
             tertiary = Color(0xFFC5D9F5),
             quaternary = Color(0xFFADC8EC),
             vibrant = VrtxColors.Fills.Vibrant(
-                secondary = Color(0xFF4DE3D1),
+                secondary = Color(0xFF5CA9FF),
             ),
         ),
         backgrounds = VrtxColors.Backgrounds(
@@ -244,7 +244,7 @@ val customThemeOptions = ThemeOptions(
         ),
         backgroundsGradient = VrtxColors.BackgroundsGradients(
             wb01 = Color(0xFFEAF3FF),
-            wb02 = Color(0xFFE7F5F6),
+            wb02 = Color(0xFFDCEBFF),
         ),
         accents = VrtxColors.Accents(
             red = Color(0xFFE05252),
@@ -345,127 +345,8 @@ omitted, so you can override only the tokens you own.
 
 The `customThemeOptions` object above is passed as `theme` in `Vrtx.setup`.
 The nested color and token objects are also public (`VrtxColors`,
-`VrtxSpacing`, and `VrtxRadius`) when an app needs to replace
-the complete design system.
+`VrtxSpacing`, and `VrtxRadius`) when an app needs to replace the complete design system.
 
-## Error reference
-
-`onError` receives a `VrtError`. Match on the concrete subtype to decide what to
-tell the user.
-
-| Error                          | Meaning                                                                | What to do                                                                 |
-| ------------------------------ | ---------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `AuthenticationError`          | Backend rejected the credentials                                       | Check `clientId` / `clientSecret` and that the app identity is registered   |
-| `SecurityVerificationError`   | Device integrity check blocked entry                                   | Read `threatCode`; the SDK has already shown its own explanation screen     |
-| `SdkAlreadyActiveError`        | `setup` was called while a session is already launching or open        | Guard your entry point; see [Callback contract](#callback-contract)        |
-| `InternalAndroidxStartupError` | SDK did not initialise                                                  | You removed AndroidX Startup; restore it                                    |
-| `InsecureEnvironmentError`     | Cleartext traffic permitted in a non-debuggable build                  | See the note below                                                        |
-
-`SecurityVerificationError.threatCode` is a stable string suitable for logging
-and crash reporting. It defaults to `SECURITY_VERIFICATION_FAILED`; the values
-include `ROOT`, `HOOK`, `TAMPER`, `DEBUGGER`, `EMULATOR`, `DEVICE_BINDING`,
-`AUTOMATION`, `SCREEN_CAPTURE`, `SCREEN_RECORDING`, `UNSECURE_WIFI`,
-`TIME_SPOOFING`, `LOCATION_SPOOFING`, `MALWARE`, `MULTI_INSTANCE`, `VPN`,
-`UNLOCKED_DEVICE`, `OBFUSCATION_ISSUES`, `DEVELOPER_MODE`, `ADB_ENABLED`,
-`UNTRUSTED_INSTALLATION`, `HARDWARE_BACKED_KEYSTORE_UNAVAILABLE`, and
-`SECURITY_VERIFICATION_FAILED`.
-
-> **`InsecureEnvironmentError` only fires in non-debuggable builds.** The check is
-> skipped when `FLAG_DEBUGGABLE` is set, so a debug build will run fine and the
-> release build will fail. The SDK checks `usesCleartextTraffic` at runtime; if
-> your app uses a `network_security_config.xml`, it must also set
-> `cleartextTrafficPermitted="false"`, which is what the error message points at.
-> Cardholder data requires TLS under PCI DSS 4.2.1.
-
-## Callback contract
-
-`Vrtx.setup` runs an internal state machine, and the callbacks do not map
-one-to-one onto a success/failure pair:
-
-```
-IDLE ──setup()──> SETTING_UP ──> SDK_SCREEN ──user exits──> IDLE
-                      │
-                      ├──integrity blocked──> SECURITY_SCREEN ──user closes──> IDLE
-                      └──already active──> IDLE (onError only)
-```
-
-- `onSuccess` fires **after** the SDK activity has been started, not after the
-  session is authenticated. Use it to clear a loading indicator.
-- `onError` can fire **while the SDK's own security screen is showing**. Treat it
-  as "the SDK could not open a session", not "the app is now in a terminal error
-  state" — otherwise you will render an error on top of the SDK's explanation
-  screen.
-- `onExit` fires when the user leaves the SDK UI, including from the security
-  screen.
-- A second `setup` call while the state machine is not `IDLE` fails fast with
-  `SdkAlreadyActiveError` and does nothing else. Disable your entry point while
-  a session is launching, so a double tap does not surface this to users.
-- Reset your loading state in all three callbacks. Every session ends in exactly
-  one of them.
-
-## Device integrity and environment policy
-
-The SDK checks device integrity and blocks entry when a threat is detected. The
-policy differs per environment, and the allowances are deliberately narrow.
-
-| Detection                                                      | Sandbox | Staging | Production |
-| -------------------------------------------------------------- | ------- | ------- | ---------- |
-| Debugger attached, obfuscation warnings                         | waived  | blocked | blocked    |
-| `TAMPER` — app ID or signing certificate mismatch              | waived  | blocked | blocked    |
-| Unlocked device, Developer Mode, ADB enabled                    | waived  | blocked | blocked    |
-| Unsecured WiFi, missing StrongBox key                           | waived  | blocked | blocked    |
-| RASP provider verification failure                              | waived  | blocked | blocked    |
-| Emulator                                                       | waived  | waived  | blocked    |
-| Untrusted (unofficial store) installation                       | waived  | waived  | waived     |
-| Root, hook, automation, malware, multi-instance                 | blocked | blocked | blocked    |
-| Screen capture, screen recording, device binding, time spoofing | blocked | blocked | blocked    |
-| Location spoofing, system VPN                                   | blocked | blocked | blocked    |
-
-Two rows deserve emphasis:
-
-- **`TAMPER` is waived in Sandbox,** and it
-  does not run during development.
-- **Emulators are allowed in Sandbox and Staging but not Production.** You can
-  develop and QA without a physical device, but Production requires real
-  hardware. The emulator-specific waivers exist because every emulator reports
-  an open virtual access point and has no StrongBox element.
-
-`CANNOT_ATTEST_IDS`-style device-ID attestation failures on an emulator are an
-emulator KeyMint limitation, not an integration error; test attestation on real
-hardware before diagnosing it.
-
-## Build the example
-
-`example/` is a standalone Gradle build that consumes the published SDK from
-Maven Central.
-
-```bash
-cd example
-./gradlew :app:assembleSandboxDebug     # or :app:assembleSandboxRelease
-```
-
-Both variant names are what CI builds, so keep them working. Override the SDK
-version with a project property:
-
-```bash
-./gradlew :app:assembleSandboxDebug -PsdkVersion=0.1.12
-```
-
-The example reads its configuration from `local.properties` or the environment.
-`local.properties` is gitignored; never commit these values.
-
-| Key                       | Purpose                                          |
-| ------------------------- | ------------------------------------------------ |
-| `VRTX_CLIENT_ID`          | Client ID issued by Vrtx                         |
-| `VRTX_CLIENT_SECRET`      | Client secret issued by Vrtx                     |
-| `VRTX_ENVIRONMENT`        | `Sandbox`, `Staging`, or `Production`            |
-| `VRTX_CERT_HASH`          | Base64 SHA-256 hash of the signing certificate   |
-| `ANDROID_KEYSTORE_FILE`   | Release keystore path; falls back to debug signing when unset |
-| `ANDROID_KEYSTORE_PASSWORD` | Release keystore password                     |
-| `ANDROID_KEY_ALIAS`       | Release key alias                                |
-| `ANDROID_KEY_PASSWORD`    | Release key password                             |
-
-## Support
 
 For credentials, license keys, and integration help, contact your Vrtx account manager or [contact@vrtx.sa](mailto:contact@vrtx.sa).
 
