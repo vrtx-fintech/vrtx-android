@@ -156,42 +156,44 @@ private val Sky = Color(0xFF5CA9FF)
 private val ElectricBlue = Color(0xFF377DFF)
 private val Cloud = Color(0xFFF4F8FF)
 private val Steel = Color(0xFF60708A)
-private val BlueThemeOptions = ThemeOptions(
+private fun blueThemeOptions(mode: Mode): ThemeOptions {
+    val isDark = mode == Mode.DARK
+    return ThemeOptions(
     cardImage = "https://placehold.co/640x400/png".toUri(),
     brandLogo = "https://placehold.co/160x64/png".toUri(),
     brandName = "Atlas Pay",
     colors = VrtxColors(
         allBrands = VrtxColors.AllBrands(
-            primary = ElectricBlue,
-            buttonLabel = Color.White,
+            primary = if (isDark) Sky else ElectricBlue,
+            buttonLabel = if (isDark) Midnight else Color.White,
         ),
         labels = VrtxColors.Labels(
-            primary = Ink,
-            secondary = Steel,
-            tertiary = Color(0xFF8B9AB2),
-            quaternary = Color(0xFFB8C4D6),
+            primary = if (isDark) Cloud else Ink,
+            secondary = if (isDark) Color(0xFFB5C4DB) else Steel,
+            tertiary = if (isDark) Color(0xFF9EB0C9) else Color(0xFF8B9AB2),
+            quaternary = if (isDark) Color(0xFF8195B2) else Color(0xFFB8C4D6),
         ),
         fills = VrtxColors.Fills(
-            primary = Color(0xFFEAF3FF),
-            secondary = Color(0xFFDCEAFF),
-            tertiary = Color(0xFFC5D9F5),
-            quaternary = Color(0xFFADC8EC),
+            primary = if (isDark) Color(0xFF1C3556) else Color(0xFFEAF3FF),
+            secondary = if (isDark) Color(0xFF23466F) else Color(0xFFDCEAFF),
+            tertiary = if (isDark) Color(0xFF2D5A8F) else Color(0xFFC5D9F5),
+            quaternary = if (isDark) Color(0xFF3B70AA) else Color(0xFFADC8EC),
             vibrant = VrtxColors.Fills.Vibrant(
                 secondary = Sky,
             ),
         ),
         backgrounds = VrtxColors.Backgrounds(
-            primary = Cloud,
-            secondary = Color(0xFFF7FAFF),
+            primary = if (isDark) Midnight else Cloud,
+            secondary = if (isDark) DeepNavy else Color(0xFFF7FAFF),
         ),
         backgroundsGradient = VrtxColors.BackgroundsGradients(
-            wb01 = Color(0xFFEAF3FF),
-            wb02 = Color(0xFFDCEBFF),
+            wb01 = if (isDark) DeepNavy else Color(0xFFEAF3FF),
+            wb02 = if (isDark) Color(0xFF142B4A) else Color(0xFFDCEBFF),
         ),
         accents = VrtxColors.Accents(
             red = Color(0xFFE05252),
-            green = Color(0xFF2E9B67),
-            greenBg = Color(0xFFE1F5EA),
+            green = if (isDark) Color(0xFF62C891) else Color(0xFF2E9B67),
+            greenBg = if (isDark) Color(0xFF194A3A) else Color(0xFFE1F5EA),
         ),
     ),
     spacing = VrtxSpacing(
@@ -208,7 +210,8 @@ private val BlueThemeOptions = ThemeOptions(
         full = 999.dp,
         huge = 64.dp,
     ),
-)
+    )
+}
 
 /** Host-app state shared by the home and settings screens, so toggles survive navigation. */
 private class PayState {
@@ -221,6 +224,7 @@ private class PayState {
     var showSettings by mutableStateOf(false)
     val isArabic: Boolean get() = language==Language.Arabic
     val isDark: Boolean get() = mode==Mode.DARK
+    val themeOptions: ThemeOptions get() = blueThemeOptions(mode)
     val fontOptions: List<FontOption> get() = if (isArabic) ArabicFontOptions else LatinFontOptions
     val fontFamily: FontFamily
         get() = fontOptions.firstOrNull { it.label==fontName }?.fontFamily
@@ -399,7 +403,7 @@ private fun HomeScreen(
                     language = pay.language,
                     designOption = DesignOption.OptionC,
                     mode = pay.mode,
-                    theme = BlueThemeOptions,
+                    theme = pay.themeOptions,
                     fontFamily = font,
                     externalReference = pay.externalReference,
                     onSuccess = {
