@@ -86,7 +86,6 @@ import sa.vrtx.public.configuration.theme.ThemeOptions
 import sa.vrtx.public.configuration.theme.VrtxColors
 import sa.vrtx.public.configuration.theme.VrtxRadius
 import sa.vrtx.public.configuration.theme.VrtxSpacing
-import sa.vrtx.public.error.SecurityVerificationError
 
 private val vrtxEnvironment: Environment =
     Environment.entries.find { it.name.equals(BuildConfig.VRTX_ENVIRONMENT, ignoreCase = true) }
@@ -411,10 +410,7 @@ private fun HomeScreen(
                     },
                     onError = { error ->
                         pay.launching = false
-                        val threatCode = (error as? SecurityVerificationError)?.threatCode
-                        val errorMessage = error.message?.let { message ->
-                            threatCode?.let { code -> "$message ($code)" } ?: message
-                        } ?: "Unknown error"
+                        val errorMessage = error.message ?: "Unknown error"
                         Toast
                             .makeText(context, "Setup failed: $errorMessage", Toast.LENGTH_LONG)
                             .show()
