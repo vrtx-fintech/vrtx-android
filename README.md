@@ -30,7 +30,7 @@ dependencyResolutionManagement {
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("sa.vrtx.sa:vrtx-android:0.1.13")
+    implementation("sa.vrtx.sa:vrtx-android:0.1.15")
 }
 ```
 
@@ -58,13 +58,13 @@ For example:
 
 ```
 Attribute application@allowBackup value=(true) from AndroidManifest.xml
-is also present at [sa.vrtx.sa:vrtx-android:0.1.9] AndroidManifest.xml value=(false).
+is also present at [sa.vrtx.sa:vrtx-android:0.1.15] AndroidManifest.xml value=(false).
 
 Attribute application@fullBackupContent value=(@xml/backup_rules) from AndroidManifest.xml
-is also present at [sa.vrtx.sa:vrtx-android:0.1.9] AndroidManifest.xml value=(false).
+is also present at [sa.vrtx.sa:vrtx-android:0.1.15] AndroidManifest.xml value=(false).
 
 Attribute application@usesCleartextTraffic value=(true) from AndroidManifest.xml
-is also present at [sa.vrtx.sa:vrtx-android:0.1.9] AndroidManifest.xml value=(false).
+is also present at [sa.vrtx.sa:vrtx-android:0.1.15] AndroidManifest.xml value=(false).
 ```
 
 Update the application attributes to match the SDK requirements. Do not override
@@ -273,7 +273,7 @@ the complete design system.
 
 `onExit` runs when the user leaves the SDK UI. Omit `externalReference` when no
 external reference is needed. `theme` and `onExit` are optional; the
-values above show the 0.1.9 defaults explicitly.
+values above show the 0.1.15 defaults explicitly.
 
 ## Support
 
